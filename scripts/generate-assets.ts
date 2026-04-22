@@ -347,22 +347,41 @@ async function generateFavicon(logoSvg: string) {
   const icoPath = join(publicDir, 'favicon.ico')
   const svgPath = join(publicDir, 'favicon.svg')
 
-  // 1. Write a dark-canvas favicon SVG alongside for modern browsers.
-  const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="${tokens.canvas}"/>
-  <g transform="translate(8 8)">${logoSvg
-    .replace(/<\?xml[^>]+\?>\s*/, '')
-    .replace(/<svg[^>]*>/, '')
-    .replace(/<\/svg>/, '')
-    .replace(/currentColor/g, tokens.textPrimary)}</g>
+  // 1. Favicon SVG: pure v0 mark, no canvas, no padding. Uses a CSS
+  //    media query inside the SVG so the fill adapts to the browser's
+  //    color scheme (black on light tabs, white on dark tabs). Same
+  //    approach Vercel ships on its own favicon.
+  //
+  //    The source mark lives between y=4 and y=12 inside a 16x16 viewBox,
+  //    so we retarget the viewBox to 0 0 16 16 but keep everything inside
+  //    a transform that visually centers the glyph vertically. That way
+  //    16x16 tab favicons don't look top-heavy.
+  const pathMatch = logoSvg.match(/<path\s[^>]*\/?>/)
+  const rawPathTag = pathMatch ? pathMatch[0] : ''
+  const pathTag = rawPathTag.replace(/\s*fill="[^"]*"/, '')
+  // Mark sits inside y:4-12 of a 16x16 grid. Use viewBox 0 3 16 10 so
+  // the mark fills most of the frame with ~1px breathing room on the
+  // short axis — reads best at 16x16 and 32x32 tabs.
+  const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 3 16 10">
+  <style>
+    path { fill: #000; }
+    @media (prefers-color-scheme: dark) { path { fill: #fff; } }
+  </style>
+  ${pathTag}
 </svg>`
   await writeFile(svgPath, faviconSvg)
   console.log('wrote', svgPath)
 
-  // 2. Rasterize to 16/32/48 via sharp, combine into .ico with png-to-ico.
+  // 2. ICO fallback for browsers that don't honor SVG favicons or CSS
+  //    inside them (older Safari, some Linux browsers). ICO can't adapt
+  //    to the tab color scheme, so we bake a white mark — most browser
+  //    chrome is dark, and the ICO is only a fallback.
+  const icoSourceSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 3 16 10">
+  ${pathTag.replace(/\/?>$/, ' fill="#ffffff"/>')}
+</svg>`
   const sizes = [16, 32, 48]
   const pngBufs = await Promise.all(
-    sizes.map((s) => sharp(Buffer.from(faviconSvg)).resize(s, s).png().toBuffer()),
+    sizes.map((s) => sharp(Buffer.from(icoSourceSvg)).resize(s, s).png().toBuffer()),
   )
   const icoBuf = await pngToIco(pngBufs)
   await writeFile(icoPath, icoBuf)
