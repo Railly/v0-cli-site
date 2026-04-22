@@ -38,9 +38,9 @@ const heroJson = `{
 <Base>
   <!-- Top nav -->
   <header class="relative z-10 flex items-center justify-between px-8 py-5 md:px-10">
-    <a href="/" class="flex items-center gap-2 text-white">
+    <a href="/" class="flex items-center gap-[3px] text-white" aria-label="v0-cli home">
       <V0Logo size={18} class="text-white" />
-      <span class="font-sans text-base font-semibold tracking-tight">v0-cli</span>
+      <span class="font-sans text-base font-semibold tracking-tight">-cli</span>
     </a>
     <a
       href="https://github.com/Railly/v0-cli"
@@ -73,7 +73,12 @@ const heroJson = `{
           class="font-sans font-semibold text-white"
           style="font-size:clamp(44px,5vw,64px);line-height:1.02;letter-spacing:-0.03em;"
         >
-          The v0 CLI<br />For Developers
+          <span class="inline-flex items-baseline gap-3">
+            The
+            <V0Logo size={52} class="text-white" />
+            CLI
+          </span>
+          <br />For Developers
         </h1>
         <p class="mt-6 max-w-[420px] text-[var(--color-text-secondary)]" style="font-size:18px;line-height:1.5;">
           Create, iterate, and deploy v0 chats from the terminal. Stable JSON,
@@ -370,10 +375,10 @@ const heroJson = `{
   <!-- Footer -->
   <footer class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-10 md:px-10">
     <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--color-text-muted)]">
-      <div class="flex items-center gap-2 text-white">
+      <div class="flex items-center gap-[3px] text-white">
         <V0Logo size={14} class="text-white" />
-        <span class="font-mono">v0-cli</span>
-        <span class="text-[var(--color-text-muted)]">· MIT</span>
+        <span class="font-mono">-cli</span>
+        <span class="ml-2 text-[var(--color-text-muted)]">· MIT</span>
       </div>
       <nav class="flex items-center gap-6">
         <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">GitHub</a>
