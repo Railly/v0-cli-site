@@ -1,0 +1,102 @@
+---
+import { Code } from 'astro:components'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const installCode = `bun install -g @crafter/v0-cli
+# or: bunx shadcn@latest add Railly/v0-cli
+v0 init
+v0 doctor`
+
+const authCode = `# Get a key at https://v0.app/chat/settings/keys
+export V0_API_KEY="v1_..."
+v0 auth whoami --json`
+
+const shorthandCode = `# Shorthand: first non-command arg → chat create --message
+v0 "landing page with hero and pricing"
+
+# Explicit (preferred for agents — cleaner audit trail)
+v0 chat create --message "landing page with hero and pricing" --json`
+
+const doctorCode = `$ v0 doctor
+v0 doctor
+  api key       ✓  v1_***
+  api reach     ✓  api.v0.dev/v1 (212ms)
+  plan          ✓  pro  (credits: 4820/5000)
+  rate limit    ✓  985/1000 (resets in 42min)
+  openapi       ✓  55 operations
+  killswitch    ✓  off`
+
+const toc = [
+  { href: '#quickstart', label: 'Quickstart' },
+  { href: '#install', label: 'Installation' },
+  { href: '#auth', label: 'Authentication' },
+  { href: '#doctor', label: 'Health check' },
+  { href: '#shorthand', label: 'Shorthand' },
+]
+---
+
+<DocsLayout
+  title="Getting started · v0-cli"
+  description="Install v0-cli, authenticate, run doctor, and ship your first chat."
+  section="getting-started"
+  kicker="Docs · Getting started"
+  heading="Get from zero to shipped in four lines."
+  toc={toc}
+>
+  <section id="quickstart" class="doc-section">
+    <h2 class="doc-h2">Quickstart</h2>
+    <p class="doc-p">Install, authenticate, ship a chat. Four lines.</p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`bun install -g @crafter/v0-cli\nv0 init                          # paste API key, save profile\nv0 doctor                        # health check\nv0 "landing page with hero"      # create your first chat`} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      No API key yet? Grab one at
+      <a href="https://v0.app/chat/settings/keys" target="_blank" rel="noreferrer" class="doc-link">v0.app/chat/settings/keys</a>.
+    </p>
+  </section>
+
+  <section id="install" class="doc-section">
+    <h2 class="doc-h2">Installation</h2>
+    <p class="doc-p">
+      The CLI is published as a Bun-native binary. <code class="doc-code">bun install -g</code> drops a single
+      <code class="doc-code">v0</code> command on your PATH. It also runs fine via <code class="doc-code">bunx</code> for one-shot use.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={installCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      Minimum requirements: <strong>Bun 1.3+</strong>. Node 22+ works for the compiled binary as fallback.
+    </p>
+  </section>
+
+  <section id="auth" class="doc-section">
+    <h2 class="doc-h2">Authentication</h2>
+    <p class="doc-p">
+      Two paths. <code class="doc-code">v0 init</code> (interactive) saves a profile to the config dir.
+      <code class="doc-code">V0_API_KEY</code> env var overrides everything — useful in CI.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={authCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      Profiles live under XDG paths. Switch with <code class="doc-code">--profile work</code> or
+      <code class="doc-code">V0_PROFILE=work</code>.
+    </p>
+  </section>
+
+  <section id="doctor" class="doc-section">
+    <h2 class="doc-h2">Health check</h2>
+    <p class="doc-p">
+      <code class="doc-code">v0 doctor</code> is a preflight any agent or human should run before a session. It validates the API key,
+      network reachability, plan credits, the current rate-limit window, and the OpenAPI spec the CLI was built against.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={doctorCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      In <code class="doc-code">--json</code> mode it returns one envelope with all checks; exit code is non-zero if anything critical failed.
+    </p>
+  </section>
+
+  <section id="shorthand" class="doc-section">
+    <h2 class="doc-h2">Shorthand</h2>
+    <p class="doc-p">
+      Any first non-flag argument that is not a registered command name becomes the positional
+      <code class="doc-code">--message</code> for <code class="doc-code">chat create</code>. Ergonomic for humans, fine for agents, but the
+      explicit form shows up cleaner in <code class="doc-code">v0 audit tail</code>.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={shorthandCode} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+</DocsLayout>

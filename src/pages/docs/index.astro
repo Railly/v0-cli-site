@@ -1,0 +1,79 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const cards = [
+  {
+    kicker: '01',
+    title: 'Getting started',
+    href: '/docs/getting-started',
+    description:
+      'Install the binary, authenticate, run a health check, and ship your first chat in four lines.',
+  },
+  {
+    kicker: '02',
+    title: 'Commands',
+    href: '/docs/commands',
+    description:
+      'Create chats, iterate, manage project env vars, deploy previews, register webhooks. The full surface.',
+  },
+  {
+    kicker: '03',
+    title: 'Agent mode',
+    href: '/docs/agent-mode',
+    description:
+      'Stable JSON envelope, NDJSON streaming, parallel chats with background workers, params vs sugar flags.',
+  },
+  {
+    kicker: '04',
+    title: 'Safety',
+    href: '/docs/safety',
+    description:
+      'Trust ladder (T0–T3), single-use intent tokens, killswitch, two-phase audit log. Safe defaults for agents.',
+  },
+  {
+    kicker: '05',
+    title: 'Reference',
+    href: '/docs/reference',
+    description:
+      'Config file layout, environment variables, exit codes. Everything you need for scripting.',
+  },
+]
+---
+
+<DocsLayout
+  title="Docs · v0-cli"
+  description="Everything there is to know about v0-cli: commands, trust ladder, parallel chats, JSON contract, configuration."
+  section="index"
+  kicker="Docs · v0.1"
+  heading="The v0 CLI, from install to ship."
+>
+  <div class="doc-section">
+    <p class="doc-p">
+      A single <code class="doc-code">v0</code> binary that mirrors 55 Platform API operations, runs safely
+      in agent pipelines, and streams generations live in a human TTY. These docs are organized in five parts —
+      start anywhere.
+    </p>
+  </div>
+
+  <div class="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    {
+      cards.map((c) => (
+        <a
+          href={c.href}
+          class="group flex flex-col gap-3 rounded-[16px] border border-[var(--color-hairline)] bg-[var(--color-bubble-dark)] px-6 py-6 transition-colors hover:border-[var(--color-hairline-hover)]"
+        >
+          <div class="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            {c.kicker}
+          </div>
+          <h3 class="font-sans text-[20px] font-semibold leading-tight tracking-tight text-white">
+            {c.title}
+          </h3>
+          <p class="text-[15px] leading-[1.55] text-[var(--color-text-secondary)]">{c.description}</p>
+          <span class="mt-2 text-sm text-[var(--color-text-secondary)] transition-colors group-hover:text-white">
+            Read →
+          </span>
+        </a>
+      ))
+    }
+  </div>
+</DocsLayout>

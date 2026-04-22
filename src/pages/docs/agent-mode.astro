@@ -1,0 +1,118 @@
+---
+import { Code } from 'astro:components'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const parallelCode = `# Each returns in <1s
+v0 "hero section"   --background --json
+# → { "chat_id": "chat_abc", "status": "running", "pid": 12345 }
+v0 "pricing table"  --background --json
+v0 "footer"         --background --json
+
+# Do other work. Then join.
+v0 chat pending --json               # list all in-flight
+v0 chat wait chat_abc --json         # block until ready → final envelope
+v0 chat wait chat_def --timeout 60   # bounded wait; exit 124 on timeout
+v0 chat watch chat_ghi               # live stream render (human or --json)
+v0 chat status chat_jkl --json       # one-shot snapshot
+v0 chat pending --clean              # GC entries >1h old`
+
+const jsonContractCode = `{
+  "data": {
+    "id": "chat_8kwbm",
+    "object": "chat",
+    "latestVersion": {
+      "id": "ver_14lmv",
+      "files": [{ "name": "app/page.tsx" }]
+    }
+  }
+}
+
+# Errors use the same envelope shape
+{
+  "error": {
+    "code": "rate_limited",
+    "type": "rate_limit_error",
+    "message": "Daily limit hit",
+    "command": "v0 chat create",
+    "auditId": "..."
+  }
+}`
+
+const streamingCode = `# Default in human TTY mode — clack spinner with phase labels
+v0 "build a tic tac toe"
+
+# Force streaming + JSON → NDJSON on stdout
+v0 chat create --message "..." --stream --json
+
+# Disable streaming in human mode (fallback for CI, NO_COLOR, or piped)
+v0 chat create --message "..." --no-stream`
+
+const toc = [
+  { href: '#json-contract', label: 'JSON contract' },
+  { href: '#streaming', label: 'Streaming render' },
+  { href: '#parallel', label: 'Parallel chats' },
+  { href: '#params', label: 'Params vs sugar' },
+]
+---
+
+<DocsLayout
+  title="Agent mode · v0-cli"
+  description="Stable JSON envelope, NDJSON streaming, parallel chats with background workers, and params vs sugar flags."
+  section="agent-mode"
+  kicker="Docs · Agent mode"
+  heading="Built to be driven by other programs."
+  toc={toc}
+>
+  <section id="json-contract" class="doc-section">
+    <h2 class="doc-h2">JSON contract</h2>
+    <p class="doc-p">
+      Every command has two output modes: human (default in TTY) and JSON (automatic when stdout is not a TTY, or when
+      <code class="doc-code">--json</code> is passed). JSON output is a stable envelope — agents can parse it with
+      <code class="doc-code">jq</code> without worrying about version drift.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">json</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={jsonContractCode} lang="json" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      Use <code class="doc-code">--fields id,latestVersion.id</code> to narrow the response and save context window in agent pipelines.
+    </p>
+  </section>
+
+  <section id="streaming" class="doc-section">
+    <h2 class="doc-h2">Streaming render</h2>
+    <p class="doc-p">
+      Generations take 30–60s. Humans see a live clack spinner with phase labels pulled from the SSE stream
+      (&ldquo;Writing TicTacToe component…&rdquo;, &ldquo;Updating globals&hellip;&rdquo;, etc). Agents get the same data as one NDJSON frame per line
+      when they pass <code class="doc-code">--json --stream</code>.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={streamingCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      SSE has no resume. A network flap requires re-sending the message. Prefer <code class="doc-code">--background</code> for long work.
+    </p>
+  </section>
+
+  <section id="parallel" class="doc-section">
+    <h2 class="doc-h2">Parallel chats</h2>
+    <p class="doc-p">
+      Serializing v0 generations wastes time. <code class="doc-code">--background</code> detaches a worker, returns the
+      <code class="doc-code">chat_id</code> in under a second, and persists state at
+      <code class="doc-code">$APP_HOME/pending/&lt;chat_id&gt;.json</code>. Reattach from any terminal.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={parallelCode} lang="bash" theme="vesper" /></div></div></div>
+    <ul class="doc-list">
+      <li><code class="doc-code">chat wait</code> blocks until the worker sets <code class="doc-code">status: done</code> or <code class="doc-code">failed</code>. Returns the same envelope as a synchronous <code class="doc-code">chat create</code>.</li>
+      <li><code class="doc-code">chat watch</code> tails the NDJSON stream log. Same human render in TTY, raw frames in <code class="doc-code">--json</code>.</li>
+      <li><code class="doc-code">chat status</code> is a single-shot snapshot. Detects stalled workers via <code class="doc-code">isProcessAlive(pid)</code>.</li>
+      <li><code class="doc-code">chat pending --clean</code> GCs finished entries older than 1h.</li>
+    </ul>
+  </section>
+
+  <section id="params" class="doc-section">
+    <h2 class="doc-h2">Params vs sugar flags</h2>
+    <p class="doc-p">
+      Every write command accepts two ways to pass the body: sugar flags like
+      <code class="doc-code">--message</code> and <code class="doc-code">--model</code>, OR a raw JSON blob via
+      <code class="doc-code">--params</code>. When both are set, <code class="doc-code">--params</code> wins. Humans should prefer the sugar; agents
+      should prefer <code class="doc-code">--params</code> to avoid building conflicting combinations.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 chat create --params '{\n  "message": "dashboard",\n  "chatPrivacy": "private",\n  "modelConfiguration": { "modelId": "v0-pro", "thinking": true }\n}' --json`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+</DocsLayout>

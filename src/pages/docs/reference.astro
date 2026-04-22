@@ -1,0 +1,68 @@
+---
+import { Code } from 'astro:components'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const configToml = `# ~/.config/v0cli/profiles/default.toml  (XDG)
+# or ~/Library/Application Support/v0cli/profiles/default.toml on macOS
+[auth]
+api_key = "v1_..."
+
+[defaults]
+model_id = "v0-pro"
+privacy = "private"
+
+[rate_limits]
+# warn when under N remaining requests
+warn_threshold = 10`
+
+const toc = [
+  { href: '#config', label: 'Config file' },
+  { href: '#env-vars', label: 'Env vars' },
+  { href: '#exit-codes', label: 'Exit codes' },
+]
+---
+
+<DocsLayout
+  title="Reference · v0-cli"
+  description="Config file layout, environment variables, and exit codes for v0-cli."
+  section="reference"
+  kicker="Docs · Reference"
+  heading="Config, env, and exit codes."
+  toc={toc}
+>
+  <section id="config" class="doc-section">
+    <h2 class="doc-h2">Config file</h2>
+    <p class="doc-p">
+      TOML. Each profile is a separate file under <code class="doc-code">profiles/</code>.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">toml</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={configToml} lang="toml" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="env-vars" class="doc-section">
+    <h2 class="doc-h2">Environment variables</h2>
+    <div class="doc-table">
+      <div class="doc-row doc-row-header"><div>Var</div><div>Effect</div></div>
+      <div class="doc-row"><div><code class="doc-code">V0_API_KEY</code></div><div>Overrides profile API key.</div></div>
+      <div class="doc-row"><div><code class="doc-code">V0_PROFILE</code></div><div>Active profile name (default: <code class="doc-code">default</code>).</div></div>
+      <div class="doc-row"><div><code class="doc-code">V0_BASE_URL</code></div><div>Override API base (default <code class="doc-code">api.v0.dev/v1</code>).</div></div>
+      <div class="doc-row"><div><code class="doc-code">V0_CLI_HOME</code></div><div>Pin all on-disk state to a custom dir.</div></div>
+      <div class="doc-row"><div><code class="doc-code">NO_COLOR</code></div><div>Disable ANSI colors.</div></div>
+      <div class="doc-row"><div><code class="doc-code">FORCE_COLOR</code></div><div>Force ANSI colors in non-TTY.</div></div>
+    </div>
+  </section>
+
+  <section id="exit-codes" class="doc-section">
+    <h2 class="doc-h2">Exit codes</h2>
+    <div class="doc-table">
+      <div class="doc-row doc-row-header"><div>Code</div><div>Meaning</div></div>
+      <div class="doc-row"><div><code class="doc-code">0</code></div><div>Success.</div></div>
+      <div class="doc-row"><div><code class="doc-code">1</code></div><div>Generic error (network, runtime).</div></div>
+      <div class="doc-row"><div><code class="doc-code">2</code></div><div>T2 confirm required in JSON mode (missing <code class="doc-code">--yes</code>).</div></div>
+      <div class="doc-row"><div><code class="doc-code">3</code></div><div>Rate limit exhausted.</div></div>
+      <div class="doc-row"><div><code class="doc-code">4</code></div><div>Validation failure (bad params).</div></div>
+      <div class="doc-row"><div><code class="doc-code">5</code></div><div>T3 intent token required / invalid / consumed.</div></div>
+      <div class="doc-row"><div><code class="doc-code">124</code></div><div><code class="doc-code">chat wait</code> timeout.</div></div>
+      <div class="doc-row"><div><code class="doc-code">130</code></div><div>User cancelled (Ctrl-C, <code class="doc-code">v0 init</code>).</div></div>
+    </div>
+  </section>
+</DocsLayout>

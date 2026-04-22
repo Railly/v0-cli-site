@@ -1,0 +1,141 @@
+---
+import { Code } from 'astro:components'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const iterateCode = `# Iterate with msg send
+v0 msg send <chat-id> "swap the hero copy"
+
+# Resolve latest version
+v0 version list <chat-id> --limit 1 --json | jq -r '.data.data[0].id'
+
+# Preview deploy (T2, dry-run safe)
+v0 deploy create <chat-id> <version-id> --dry-run --json`
+
+const initFromLocalCode = `# Zero token cost — init from existing source
+v0 chat init --type files --source ./my-app --json
+
+# Also: repo (url), registry (url), zip (url), template (id)
+v0 chat init --type repo --source https://github.com/user/repo --branch main`
+
+const envCode = `# Redacted list — values come back as ciphertext
+v0 env list prj_xxx --json
+
+# Reveal decrypted values (T2 — needs --yes in JSON mode)
+v0 env list prj_xxx --decrypted --yes --json
+
+# Set a plain key (T1, silent)
+v0 env set prj_xxx API_URL=https://api.example.com --json
+
+# Set a secret-pattern key (T2 — needs --yes)
+v0 env set prj_xxx STRIPE_SECRET_KEY=sk_test_... --yes --json
+
+# Push a local .env (creates + updates; never deletes)
+v0 env push prj_xxx --from .env --yes --json
+
+# Pull decrypted values to disk (T2)
+v0 env pull prj_xxx --out .env.v0 --yes`
+
+const toc = [
+  { href: '#chat-create', label: 'Create a chat' },
+  { href: '#chat-init', label: 'Init from files' },
+  { href: '#iterate', label: 'Iterate + ship' },
+  { href: '#cmd-env', label: 'env' },
+  { href: '#cmd-deploy', label: 'deploy' },
+  { href: '#cmd-hook', label: 'hook' },
+  { href: '#cmd-all', label: 'All operations' },
+]
+---
+
+<DocsLayout
+  title="Commands · v0-cli"
+  description="Create chats, init from files, iterate, manage env vars, deploy previews, register webhooks, and the full 55-operation surface."
+  section="commands"
+  kicker="Docs · Commands"
+  heading="The full surface, grouped by noun."
+  toc={toc}
+>
+  <section id="chat-create" class="doc-section">
+    <h2 class="doc-h2">Create a chat</h2>
+    <p class="doc-p">
+      <code class="doc-code">chat create</code> is T1 — it costs tokens, logs to the audit trail, never prompts.
+      In a human TTY it streams generation live with a clack spinner. In <code class="doc-code">--json</code> mode it blocks and returns one envelope,
+      or emits NDJSON if you pass <code class="doc-code">--stream</code>.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 chat create --message "Terminal dashboard" --project prj_xxx --privacy private --json`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="chat-init" class="doc-section">
+    <h2 class="doc-h2">Init from existing files</h2>
+    <p class="doc-p">
+      <code class="doc-code">chat init</code> does not call the model. It uploads a seed (local dir, public repo, registry URL, zip, or a template id) and
+      creates a chat anchored to that source. Zero token cost. Use this whenever you already have code you want to iterate on.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={initFromLocalCode} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="iterate" class="doc-section">
+    <h2 class="doc-h2">Iterate and ship</h2>
+    <p class="doc-p">
+      Once you have a <code class="doc-code">chat_id</code>, send follow-up messages with <code class="doc-code">msg send</code>, grab the latest
+      <code class="doc-code">version_id</code>, then deploy.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={iterateCode} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="cmd-env" class="doc-section">
+    <h2 class="doc-h2">env · project vars</h2>
+    <p class="doc-p">
+      Sync project environment variables. Values are always returned ciphertext unless you explicitly ask with
+      <code class="doc-code">--decrypted</code> (which is T2 — requires confirmation).
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={envCode} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="cmd-deploy" class="doc-section">
+    <h2 class="doc-h2">deploy · preview and ship</h2>
+    <p class="doc-p">
+      Deployments are T2 — preview with <code class="doc-code">--dry-run</code>, ship with <code class="doc-code">--yes</code> in JSON mode.
+      <code class="doc-code">--wait</code> polls until the deployment reaches a terminal status.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`# Dry-run first (T2 safe)\nv0 deploy create <chat-id> <ver-id> --dry-run --json\n\n# Ship, wait for READY status\nv0 deploy create <chat-id> <ver-id> --yes --wait --json\n\n# Observe an existing deployment\nv0 deploy logs <dep-id> --tail --json\nv0 deploy errors <dep-id> --json`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="cmd-hook" class="doc-section">
+    <h2 class="doc-h2">hook · webhooks</h2>
+    <p class="doc-p">
+      <code class="doc-code">hook create</code> is T1, <code class="doc-code">hook update</code> is T2, <code class="doc-code">hook delete</code> is T3
+      (requires intent token).
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 hook list --json\nv0 hook create --url https://example.com/v0-webhook --event chat.completed --json`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="cmd-all" class="doc-section">
+    <h2 class="doc-h2">All 55 operations</h2>
+    <p class="doc-p">
+      The CLI mirrors the v0 Platform API 1:1. Noun · verbs:
+    </p>
+    <div class="doc-table">
+      <div class="doc-row doc-row-header"><div>Noun</div><div>Verbs</div></div>
+      <div class="doc-row"><div><code class="doc-code">auth</code></div><div>status, whoami, login</div></div>
+      <div class="doc-row"><div><code class="doc-code">user</code></div><div>get, plan, billing, scopes</div></div>
+      <div class="doc-row"><div><code class="doc-code">project</code></div><div>list, show, show-by-chat, create, update, assign, delete</div></div>
+      <div class="doc-row"><div><code class="doc-code">chat</code></div><div>list, show, create, init, update, fork, favorite, delete, pending, status, watch, wait</div></div>
+      <div class="doc-row"><div><code class="doc-code">msg</code></div><div>list, show, send, resume, stop</div></div>
+      <div class="doc-row"><div><code class="doc-code">version</code></div><div>list, show, update, files-delete</div></div>
+      <div class="doc-row"><div><code class="doc-code">deploy</code></div><div>list, show, create, delete, logs, errors, batch</div></div>
+      <div class="doc-row"><div><code class="doc-code">env</code></div><div>list, get, set, update, delete, pull, push</div></div>
+      <div class="doc-row"><div><code class="doc-code">hook</code></div><div>list, show, create, update, delete</div></div>
+      <div class="doc-row"><div><code class="doc-code">mcp-server</code></div><div>list, show, create, update, delete</div></div>
+      <div class="doc-row"><div><code class="doc-code">integrations vercel</code></div><div>list, link</div></div>
+      <div class="doc-row"><div><code class="doc-code">report</code></div><div>usage, activity</div></div>
+      <div class="doc-row"><div><code class="doc-code">rate-limits</code></div><div>find</div></div>
+      <div class="doc-row"><div><code class="doc-code">intent</code></div><div>issue, list, purge</div></div>
+      <div class="doc-row"><div><code class="doc-code">killswitch</code></div><div>on, off, status</div></div>
+      <div class="doc-row"><div><code class="doc-code">audit</code></div><div>tail</div></div>
+      <div class="doc-row"><div><code class="doc-code">doctor</code>, <code class="doc-code">schema</code>, <code class="doc-code">init</code></div><div>(top-level)</div></div>
+    </div>
+    <p class="doc-p">
+      Every command ships with <code class="doc-code">--help</code> and <code class="doc-code">v0 schema &lt;operation&gt;</code> for offline introspection.
+    </p>
+  </section>
+</DocsLayout>

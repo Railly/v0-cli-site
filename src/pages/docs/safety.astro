@@ -1,0 +1,94 @@
+---
+import { Code } from 'astro:components'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+
+const intentCode = `# 1. Try a T3 op. Exit 5, intent_required.
+v0 hook delete hook_abc --json
+# → { "error": { "code": "intent_required", ... } }
+
+# 2. Mint an intent bound to exact action + params
+TOKEN=$(v0 intent issue --action hook.delete \\
+  --params '{"hookId":"hook_abc"}' --json | jq -r '.data.token')
+
+# 3. Consume it once. Exit 0.
+v0 hook delete hook_abc --confirm "$TOKEN" --json
+# → { "data": { "id": "hook_abc", "deleted": true } }
+
+# 4. Re-use same token. Exit 5, intent_consumed.
+# 5. Use for a different action. Exit 5, intent_action_mismatch.`
+
+const toc = [
+  { href: '#trust-ladder', label: 'Trust ladder' },
+  { href: '#intent-tokens', label: 'Intent tokens' },
+  { href: '#killswitch', label: 'Killswitch' },
+  { href: '#audit', label: 'Audit trail' },
+]
+---
+
+<DocsLayout
+  title="Safety · v0-cli"
+  description="Trust ladder, intent tokens, killswitch, and two-phase audit log. Safe defaults for agent pipelines."
+  section="safety"
+  kicker="Docs · Safety"
+  heading="Safe defaults for autonomous work."
+  toc={toc}
+>
+  <section id="trust-ladder" class="doc-section">
+    <h2 class="doc-h2">Trust ladder</h2>
+    <p class="doc-p">
+      Every command is classified T0–T3. The classification is readable from the command name and enforced before the network call.
+    </p>
+    <div class="doc-table three-col">
+      <div class="doc-row doc-row-header">
+        <div>Tier</div><div>Friction</div><div>Examples</div>
+      </div>
+      <div class="doc-row">
+        <div><span class="tier-pill">T0</span></div>
+        <div>Silent read.</div>
+        <div><code class="doc-code">doctor</code>, <code class="doc-code">auth whoami</code>, any <code class="doc-code">list</code>, any <code class="doc-code">show</code>, <code class="doc-code">chat pending</code></div>
+      </div>
+      <div class="doc-row">
+        <div><span class="tier-pill">T1</span></div>
+        <div>Audit only, no prompt.</div>
+        <div><code class="doc-code">chat create</code>, <code class="doc-code">msg send</code>, <code class="doc-code">env set</code> (plain), <code class="doc-code">project create</code></div>
+      </div>
+      <div class="doc-row">
+        <div><span class="tier-pill">T2</span></div>
+        <div>TTY prompt or <code class="doc-code">--yes</code>. Exit 2 in JSON without.</div>
+        <div><code class="doc-code">deploy create</code>, <code class="doc-code">env list --decrypted</code>, <code class="doc-code">chat delete</code></div>
+      </div>
+      <div class="doc-row">
+        <div><span class="tier-pill">T3</span></div>
+        <div>Single-use intent token. Exit 5 without.</div>
+        <div><code class="doc-code">hook delete</code>, <code class="doc-code">deploy delete</code>, <code class="doc-code">env delete</code> (bulk)</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="intent-tokens" class="doc-section">
+    <h2 class="doc-h2">Intent tokens</h2>
+    <p class="doc-p">
+      T3 operations require a single-use HMAC-SHA256 token bound to
+      <code class="doc-code">action + hash(params)</code>. Tokens expire after 15 minutes, can be used exactly once, and cannot be retargeted.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={intentCode} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="killswitch" class="doc-section">
+    <h2 class="doc-h2">Killswitch</h2>
+    <p class="doc-p">
+      The killswitch is a file on disk that blocks every T2 and T3 operation instantly. Meant for the human supervisor:
+      something went wrong, halt everything.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 killswitch on       # flip it\nv0 killswitch status   # check\nv0 killswitch off      # release`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+
+  <section id="audit" class="doc-section">
+    <h2 class="doc-h2">Audit trail</h2>
+    <p class="doc-p">
+      Every write is logged to a JSONL file under <code class="doc-code">$APP_HOME/audit/</code> in two phases: <strong>pending</strong> before the
+      network call, <strong>final</strong> after. Crash-safe — if the CLI dies mid-call, the pending line survives for forensics.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 audit tail --limit 20 --json\nv0 audit tail --since 1h --failed --json`} lang="bash" theme="vesper" /></div></div></div>
+  </section>
+</DocsLayout>
