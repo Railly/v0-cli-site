@@ -1,0 +1,33 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = 'v0-cli — Agent-first CLI for the v0 Platform API',
+  description = 'A single v0 binary. 55 operations. Stable JSON output, trust ladder, audit trail, intent tokens for destructive ops.',
+} = Astro.props
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://v0-cli.crafter.run" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,103 @@
+{
+  "source": "vercel.com homepage screenshot (2026-04)",
+  "colors": {
+    "background": {
+      "primary": "#000000",
+      "secondary": "#0A0A0A",
+      "elevated": "#0F0F0F",
+      "bubbleLight": "#FFFFFF"
+    },
+    "border": {
+      "hairline": "rgba(255,255,255,0.08)",
+      "hairlineHover": "rgba(255,255,255,0.25)",
+      "grid": "rgba(255,255,255,0.04)",
+      "crosshair": "rgba(255,255,255,0.35)"
+    },
+    "text": {
+      "onDarkPrimary": "#EDEDED",
+      "onDarkSecondary": "#A1A1A1",
+      "onDarkMuted": "#666666",
+      "onLight": "#000000"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": "Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif",
+      "body": "Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif",
+      "mono": "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    },
+    "fontSize": {
+      "hero": "56px",
+      "h1": "48px",
+      "h2": "32px",
+      "h3": "24px",
+      "bodyLg": "20px",
+      "body": "16px",
+      "small": "14px",
+      "micro": "12px",
+      "mono": "14px"
+    },
+    "fontWeight": {
+      "semibold": 600,
+      "medium": 500,
+      "regular": 400
+    },
+    "lineHeight": {
+      "tight": 1.05,
+      "snug": 1.2,
+      "normal": 1.5,
+      "relaxed": 1.55
+    },
+    "letterSpacing": {
+      "tighter": "-0.02em",
+      "tight": "-0.015em",
+      "normal": "0",
+      "wide": "0.02em"
+    }
+  },
+  "spacing": {
+    "section": "120px",
+    "block": "64px",
+    "element": "24px",
+    "tight": "8px",
+    "micro": "4px",
+    "bubblePadX": "44px",
+    "bubblePadY": "28px"
+  },
+  "borderRadius": {
+    "bubble": "28px",
+    "card": "16px",
+    "pill": "9999px",
+    "input": "10px"
+  },
+  "grid": {
+    "cellSize": "82px",
+    "cols": 12,
+    "lineColor": "rgba(255,255,255,0.04)",
+    "crosshairColor": "rgba(255,255,255,0.35)",
+    "crosshairLength": "14px"
+  },
+  "animation": {
+    "duration": {
+      "fast": "150ms",
+      "normal": "240ms",
+      "slow": "400ms"
+    },
+    "easing": {
+      "default": "cubic-bezier(0.2, 0, 0, 1)",
+      "out": "cubic-bezier(0.33, 1, 0.68, 1)"
+    }
+  },
+  "effects": [
+    "hairline-grid-background",
+    "imessage-bubble-pair",
+    "hairline-pill-button",
+    "hairline-nav",
+    "announcement-hairline-pill",
+    "sparkle-prefix",
+    "crosshair-registration-marks",
+    "monochrome-dark-canvas",
+    "geist-typographic-voice",
+    "authoritative-period-punctuation"
+  ]
+}
