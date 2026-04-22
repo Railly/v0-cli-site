@@ -33,6 +33,16 @@ const heroJson = `{
     }
   }
 }`
+
+const parallelCode = `# Fire three chats. Each returns in <1s.
+v0 "hero section"   --background --json
+v0 "pricing table"  --background --json
+v0 "footer"         --background --json
+
+# Do other work. Then join.
+v0 chat pending --json           # list all in-flight
+v0 chat wait chat_abc --json     # block until ready
+v0 chat watch chat_def           # live stream render`
 ---
 
 <Base>
@@ -57,7 +67,7 @@ const heroJson = `{
     <a href="#overview" class="transition-colors hover:text-white">Overview</a>
     <a href="#install" class="transition-colors hover:text-white">Install</a>
     <a href="#workflow" class="transition-colors hover:text-white">Workflow</a>
-    <a href="#trust" class="transition-colors hover:text-white">Trust</a>
+    <a href="#parallel" class="transition-colors hover:text-white">Parallel</a>
     <a href="https://github.com/Railly/v0-cli#readme" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">Docs ↗</a>
   </nav>
 
@@ -73,16 +83,16 @@ const heroJson = `{
           class="font-sans font-semibold text-white"
           style="font-size:clamp(44px,5vw,64px);line-height:1.02;letter-spacing:-0.03em;"
         >
-          <span class="inline-flex items-baseline gap-3">
+          <span class="inline-flex items-center gap-3">
             The
-            <V0Logo size={52} class="text-white" />
+            <V0Logo size={96} class="-my-6 text-white" />
             CLI
           </span>
           <br />For Developers
         </h1>
-        <p class="mt-6 max-w-[420px] text-[var(--color-text-secondary)]" style="font-size:18px;line-height:1.5;">
-          Create, iterate, and deploy v0 chats from the terminal. Stable JSON,
-          trust ladder, audit trail, single-use intent tokens for destructive ops.
+        <p class="mt-6 max-w-[440px] text-[var(--color-text-secondary)]" style="font-size:18px;line-height:1.5;">
+          Create, iterate, and deploy v0 chats from the terminal.
+          Streaming render, parallel generations in background, stable JSON for agents.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-3">
           <a
@@ -157,13 +167,18 @@ const heroJson = `{
       </div>
       <div class="px-2 py-12 md:px-10">
         <h3 class="font-sans font-semibold text-white" style="font-size:22px;line-height:1.2;letter-spacing:-0.01em;">
-          Safe by default,<br />destructive by intent
+          Parallel chats,<br />non-blocking agents
         </h3>
         <p class="mt-4 text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
-          Reads are silent. Writes log. Destructive operations require a single-use intent token bound to the exact
-          action and params it was minted for.
+          <code class="font-mono text-[13px] text-white">--background</code> returns a chat id in under a second.
+          Fire N generations at once, keep working, reattach later with
+          <code class="font-mono text-[13px] text-white">chat wait</code> or
+          <code class="font-mono text-[13px] text-white">chat watch</code>.
         </p>
       </div>
+    </div>
+    <div class="border-t border-[var(--color-hairline)] px-2 py-5 text-center text-sm text-[var(--color-text-muted)] md:px-10">
+      Trust ladder built in: reads are silent (T0), writes log (T1), confirms gate T2, single-use intent tokens gate T3.
     </div>
   </section>
 
@@ -245,70 +260,39 @@ const heroJson = `{
     </div>
   </section>
 
-  <!-- Trust ladder: 4 hairline cards, horizontal -->
-  <section id="trust" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
-    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+  <!-- Parallel chats: the killer agent feature -->
+  <section id="parallel" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid items-start gap-12 lg:grid-cols-[minmax(0,440px)_1fr] lg:gap-16">
       <div>
         <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
           <V0Logo size={12} class="text-[var(--color-text-muted)]" />
-          <span>Trust ladder</span>
+          <span>Parallel chats</span>
         </div>
         <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
-          Four levels.<br /><span class="text-[var(--color-text-secondary)]">Readable from the command name.</span>
+          Three chats.<br /><span class="text-[var(--color-text-secondary)]">One second of block time.</span>
         </h2>
+        <p class="mt-6 max-w-[440px] text-[var(--color-text-secondary)]" style="font-size:16px;line-height:1.55;">
+          Each v0 generation takes 30–60s. Agents that serialize burn time doing nothing.
+          <code class="font-mono text-[14px] text-white">--background</code> detaches a worker and returns the
+          <code class="font-mono text-[14px] text-white">chat_id</code> immediately. Persisted across crashes.
+          Reattach from any terminal.
+        </p>
+        <div class="mt-6 flex items-center gap-3 text-sm text-[var(--color-text-secondary)]">
+          <span class="pill pill-sm">chat pending</span>
+          <span class="pill pill-sm">chat wait</span>
+          <span class="pill pill-sm">chat watch</span>
+        </div>
       </div>
-      <div class="grid gap-5 md:grid-cols-2">
-        <article class="code-card p-6">
-          <div class="mb-2 flex items-baseline gap-3">
-            <span class="font-mono text-sm text-[var(--color-text-muted)]">T0</span>
-            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Auto.</h3>
+      <div class="code-card" style="border-radius:var(--radius-card);">
+        <div class="code-tabs">
+          <span class="code-tab is-active">parallel</span>
+          <span class="ml-auto pr-3 font-mono text-xs text-[var(--color-text-muted)]">bash</span>
+        </div>
+        <div class="code-panels">
+          <div class="code-panel is-active">
+            <Code code={parallelCode} lang="bash" theme="vesper" />
           </div>
-          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
-            Silent reads. <code class="font-mono text-[13px] text-white">v0 doctor</code>,
-            <code class="font-mono text-[13px] text-white">auth whoami</code>,
-            <code class="font-mono text-[13px] text-white">project list</code>, every
-            <code class="font-mono text-[13px] text-white">list</code> and
-            <code class="font-mono text-[13px] text-white">show</code>.
-          </p>
-        </article>
-        <article class="code-card p-6">
-          <div class="mb-2 flex items-baseline gap-3">
-            <span class="font-mono text-sm text-[var(--color-text-muted)]">T1</span>
-            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Log.</h3>
-          </div>
-          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
-            Audit only, no prompt. <code class="font-mono text-[13px] text-white">chat create</code>,
-            <code class="font-mono text-[13px] text-white">chat init</code>,
-            <code class="font-mono text-[13px] text-white">msg send</code>,
-            <code class="font-mono text-[13px] text-white">env set</code> (plain keys),
-            <code class="font-mono text-[13px] text-white">project create</code>.
-          </p>
-        </article>
-        <article class="code-card p-6">
-          <div class="mb-2 flex items-baseline gap-3">
-            <span class="font-mono text-sm text-[var(--color-text-muted)]">T2</span>
-            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Confirm.</h3>
-          </div>
-          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
-            TTY prompt or <code class="font-mono text-[13px] text-white">--yes</code>. Exits 2 in JSON
-            mode without it. Covers <code class="font-mono text-[13px] text-white">deploy create</code>,
-            <code class="font-mono text-[13px] text-white">env list --decrypted</code>,
-            <code class="font-mono text-[13px] text-white">chat delete</code>.
-          </p>
-        </article>
-        <article class="code-card p-6">
-          <div class="mb-2 flex items-baseline gap-3">
-            <span class="font-mono text-sm text-[var(--color-text-muted)]">T3</span>
-            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Killswitch.</h3>
-          </div>
-          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
-            Single-use intent token bound to <code class="font-mono text-[13px] text-white">action + hash(params)</code>.
-            Expires. Cannot be reused. Cannot be retargeted.
-            <code class="font-mono text-[13px] text-white">hook delete</code>,
-            <code class="font-mono text-[13px] text-white">deploy delete</code>,
-            <code class="font-mono text-[13px] text-white">env delete</code> (bulk).
-          </p>
-        </article>
+        </div>
       </div>
     </div>
   </section>
