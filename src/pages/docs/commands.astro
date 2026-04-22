@@ -142,7 +142,13 @@ const toc = [
       Deployments are T2 — preview with <code class="doc-code">--dry-run</code>, ship with <code class="doc-code">--yes</code> in JSON mode.
       <code class="doc-code">--wait</code> polls until the deployment reaches a terminal status.
     </p>
-    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`# Dry-run first (T2 safe)\nv0 deploy create <chat-id> <ver-id> --dry-run --json\n\n# Ship, wait for READY status\nv0 deploy create <chat-id> <ver-id> --yes --wait --json\n\n# Observe an existing deployment\nv0 deploy logs <dep-id> --tail --json\nv0 deploy errors <dep-id> --json`} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      In a human TTY, <code class="doc-code">--wait</code> streams status transitions as past-tense steps
+      (<code class="doc-code">Queued · 2s</code>, <code class="doc-code">Built · 45s</code>, <code class="doc-code">Deployed · 12s</code>, …) with a rolling
+      <code class="doc-code">Thinking…</code> spinner in between — same transcript style as <code class="doc-code">chat create</code> and <code class="doc-code">msg send</code>.
+      <code class="doc-code">--json</code> keeps emitting NDJSON so agents that pipe through <code class="doc-code">jq</code> are unaffected.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`# Dry-run first (T2 safe)\nv0 deploy create <chat-id> <ver-id> --dry-run --json\n\n# Ship + live transcript (human TTY)\nv0 deploy create <chat-id> <ver-id> --yes --wait\n\n# Ship + NDJSON stream (agents)\nv0 deploy create <chat-id> <ver-id> --yes --wait --json\n\n# Observe an existing deployment\nv0 deploy logs <dep-id> --tail --json\nv0 deploy errors <dep-id> --json`} lang="bash" theme="vesper" /></div></div></div>
   </section>
 
   <section id="cmd-version-download" class="doc-section">
