@@ -3,29 +3,15 @@
 /* Geist + Geist Mono (Vercel's open-source type stack). */
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
 
-/* Design tokens extracted from vercel.com (2026-04) and mapped to
-   Tailwind v4 theme variables. See visual-reference/vercel-style.md. */
+/* Typography, radii, grid geometry, motion — theme-agnostic tokens live in
+   Tailwind's @theme block so utilities resolve them at build time.
+   Color tokens are declared as regular CSS custom properties below so they
+   can be re-scoped per theme via [data-theme="..."]. */
 @theme {
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter,
     system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
     monospace;
-
-  /* Monochromatic palette — no saturated color by design. */
-  --color-canvas: #000000;
-  --color-elevated: #0a0a0a;
-  --color-bubble-dark: #0f0f0f;
-  --color-bubble-light: #ffffff;
-
-  --color-hairline: rgba(255, 255, 255, 0.08);
-  --color-hairline-hover: rgba(255, 255, 255, 0.25);
-  --color-grid-line: rgba(255, 255, 255, 0.04);
-  --color-crosshair: rgba(255, 255, 255, 0.35);
-
-  --color-text-primary: #ededed;
-  --color-text-secondary: #a1a1a1;
-  --color-text-muted: #666666;
-  --color-text-on-light: #000000;
 
   /* Typographic scale. Negative tracking on display sizes is load-bearing. */
   --text-hero: 56px;
@@ -63,7 +49,46 @@
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-/* Base layer. The canvas stays pure black everywhere. */
+/* --------------------------------------------------------------------------
+   Dark palette (default). Monochromatic — no saturated color by design.
+   :root and [data-theme="dark"] share values so :root is authoritative before
+   the no-flash script has run.
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces. */
+  --color-canvas: #000000;
+  --color-elevated: #0a0a0a;
+  --color-bubble-dark: #0f0f0f;
+  --color-bubble-light: #ffffff;
+
+  /* Hairlines + overlays (all phrased as foreground-on-canvas alpha). */
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-hairline-hover: rgba(255, 255, 255, 0.25);
+  --color-grid-line: rgba(255, 255, 255, 0.04);
+  --color-crosshair: rgba(255, 255, 255, 0.35);
+  --color-overlay-subtle: rgba(255, 255, 255, 0.03);
+  --color-overlay-soft: rgba(255, 255, 255, 0.04);
+  --color-overlay: rgba(255, 255, 255, 0.06);
+
+  /* Text. */
+  --color-text-primary: #ededed;
+  --color-text-secondary: #a1a1a1;
+  --color-text-muted: #666666;
+  --color-text-on-light: #000000;
+
+  /* "Ink" = the strongest foreground color (used for hover :to-white effects).
+     Flips to near-black in light mode. */
+  --color-ink: #ffffff;
+
+  /* Selection. */
+  --color-selection-bg: #ffffff;
+  --color-selection-fg: #000000;
+}
+
+/* Base layer. */
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
@@ -137,8 +162,7 @@ pre.astro-code {
 }
 
 /* Code card — the AI-Gateway-style terminal panel used throughout the site.
-   Dark elevated surface, 1px hairline, tight radius. Acts as the single
-   container primitive that replaces the iMessage bubbles. */
+   Elevated surface, 1px hairline, tight radius. */
 .code-card {
   background: var(--color-bubble-dark);
   border: 1px solid var(--color-hairline);
@@ -174,7 +198,7 @@ pre.astro-code {
 }
 .code-tab.is-active {
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-overlay-soft);
   border-color: var(--color-hairline);
 }
 .code-tab.is-static {
@@ -210,7 +234,7 @@ pre.astro-code {
 }
 .pill:hover {
   border-color: var(--color-hairline-hover);
-  color: #fff;
+  color: var(--color-ink);
 }
 .pill-sm {
   padding: 6px 14px;
@@ -263,8 +287,8 @@ pre.astro-code {
 
 /* Selection. */
 ::selection {
-  background: #ffffff;
-  color: #000000;
+  background: var(--color-selection-bg);
+  color: var(--color-selection-fg);
 }
 
 /* ===========================================================================
@@ -280,7 +304,7 @@ pre.astro-code {
 }
 
 .prose-docs h1 {
-  color: #fff;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: clamp(38px, 4vw, 52px);
@@ -306,7 +330,7 @@ pre.astro-code {
 
 .prose-docs .doc-h2,
 .prose-docs h2 {
-  color: #fff;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 28px;
@@ -318,7 +342,7 @@ pre.astro-code {
 }
 
 .prose-docs h3 {
-  color: #fff;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 20px;
@@ -342,7 +366,7 @@ pre.astro-code {
 
 .prose-docs .doc-p strong,
 .prose-docs p strong {
-  color: #fff;
+  color: var(--color-ink);
   font-weight: 600;
 }
 
@@ -358,8 +382,8 @@ pre.astro-code {
 
 .prose-docs a:hover,
 .prose-docs .doc-link:hover {
-  color: #fff;
-  text-decoration-color: #fff;
+  color: var(--color-ink);
+  text-decoration-color: var(--color-ink);
 }
 
 /* Inline code. Muted background, mono, tight sizing. */
@@ -368,7 +392,7 @@ pre.astro-code {
   font-family: var(--font-mono);
   font-size: 13px;
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-overlay);
   border: 1px solid var(--color-hairline);
   border-radius: 6px;
   padding: 1px 6px;
@@ -441,7 +465,7 @@ pre.astro-code {
 }
 
 .prose-docs .doc-row-header {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-overlay-subtle);
 }
 
 .prose-docs .doc-row-header > div {
@@ -470,17 +494,17 @@ pre.astro-code {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-overlay-subtle);
 }
 
 /* Active link state for TOC ScrollSpy. */
 .toc-link.is-active {
-  color: #fff;
+  color: var(--color-ink);
 }
 
 /* Sidebar link active state. */
 .docs-sidebar-link.is-current {
-  color: #fff;
+  color: var(--color-ink);
 }
 .docs-sidebar-group.is-current-group > .docs-sidebar-heading {
   color: var(--color-text-primary);
