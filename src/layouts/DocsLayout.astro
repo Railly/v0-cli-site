@@ -3,7 +3,7 @@ import Header from '../components/Header.astro'
 import V0Logo from '../components/V0Logo.astro'
 import Base from './Base.astro'
 
-export type DocsSectionSlug =
+type DocsSectionSlug =
   | 'index'
   | 'getting-started'
   | 'commands'
@@ -11,7 +11,7 @@ export type DocsSectionSlug =
   | 'safety'
   | 'reference'
 
-export interface TocItem {
+interface TocItem {
   href: string
   label: string
 }
