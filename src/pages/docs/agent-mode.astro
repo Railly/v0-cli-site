@@ -114,5 +114,11 @@ const toc = [
       should prefer <code class="doc-code">--params</code> to avoid building conflicting combinations.
     </p>
     <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`v0 chat create --params '{\n  "message": "dashboard",\n  "chatPrivacy": "private",\n  "modelConfiguration": { "modelId": "v0-pro", "thinking": true }\n}' --json`} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      The same contract applies to <code class="doc-code">chat init</code>. Agents can pass a positional source for the
+      ergonomic form (<code class="doc-code">v0 chat init ./my-app --json</code>) or go fully explicit with
+      <code class="doc-code">{`--params '{"type":"files","source":"./my-app"}' --json`}</code>. Both are equally auditable —
+      the audit trail records the resolved params either way.
+    </p>
   </section>
 </DocsLayout>

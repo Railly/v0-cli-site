@@ -11,11 +11,21 @@ v0 version list <chat-id> --limit 1 --json | jq -r '.data.data[0].id'
 # Preview deploy (T2, dry-run safe)
 v0 deploy create <chat-id> <version-id> --dry-run --json`
 
-const initFromLocalCode = `# Zero token cost — init from existing source
-v0 chat init --type files --source ./my-app --json
+const initFromLocalCode = `# Zero token cost — init from existing source.
+# Source shape auto-detects: path, repo URL, zip, registry.json, template URL, or template id.
+v0 chat init ./my-app --json
+v0 chat init https://github.com/user/repo --branch main --json
+v0 chat init https://example.com/registry.json --json
+v0 chat init template_abc --name "Optimus prime" --project prj_xxx --json
 
-# Also: repo (url), registry (url), zip (url), template (id)
-v0 chat init --type repo --source https://github.com/user/repo --branch main`
+# Force the type if auto-detect guesses wrong
+v0 chat init ./my-app --type files --json
+
+# Browse the v0.app template gallery
+v0 chat init --list-templates
+
+# Legacy --type/--source form still works
+v0 chat init --type repo --source https://github.com/user/repo --branch main --json`
 
 const envCode = `# Redacted list — values come back as ciphertext
 v0 env list prj_xxx --json
@@ -67,10 +77,29 @@ const toc = [
   <section id="chat-init" class="doc-section">
     <h2 class="doc-h2">Init from existing files</h2>
     <p class="doc-p">
-      <code class="doc-code">chat init</code> does not call the model. It uploads a seed (local dir, public repo, registry URL, zip, or a template id) and
-      creates a chat anchored to that source. Zero token cost. Use this whenever you already have code you want to iterate on.
+      <code class="doc-code">chat init</code> does not call the model. It uploads a seed (local dir, public repo, zip,
+      shadcn registry URL, template URL, or template id) and creates a chat anchored to that source. Zero token cost.
+      Use this whenever you already have code you want to iterate on.
     </p>
+    <p class="doc-p">
+      Signature: <code class="doc-code">v0 chat init &lt;source&gt; [--branch main] [--name "Build"] [--project prj_xxx]</code>.
+      The source shape decides the type — pass any of the inputs below and the CLI picks the right uploader. Pass
+      <code class="doc-code">--type files|repo|zip|registry|template</code> to force an override, or
+      <code class="doc-code">--list-templates</code> to open the v0.app gallery.
+    </p>
+    <div class="doc-table">
+      <div class="doc-row doc-row-header"><div>Source</div><div>Detected type</div></div>
+      <div class="doc-row"><div><code class="doc-code">.</code> · <code class="doc-code">./dir</code> · <code class="doc-code">~/path</code> · <code class="doc-code">/abs/path</code></div><div>files</div></div>
+      <div class="doc-row"><div><code class="doc-code">https://github.com/&hellip;</code></div><div>repo</div></div>
+      <div class="doc-row"><div><code class="doc-code">https://&hellip;.zip</code></div><div>zip</div></div>
+      <div class="doc-row"><div><code class="doc-code">https://&hellip;/registry.json</code></div><div>registry (shadcn)</div></div>
+      <div class="doc-row"><div><code class="doc-code">https://v0.app/templates/&hellip;</code></div><div>template (id extracted)</div></div>
+      <div class="doc-row"><div><code class="doc-code">template_abc</code> · <code class="doc-code">tpl_abc</code></div><div>template</div></div>
+    </div>
     <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={initFromLocalCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">
+      The legacy <code class="doc-code">--type &lt;kind&gt; --source &lt;value&gt;</code> form still works unchanged.
+    </p>
   </section>
 
   <section id="iterate" class="doc-section">

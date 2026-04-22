@@ -11,11 +11,21 @@ const authCode = `# Get a key at https://v0.app/chat/settings/keys
 export V0_API_KEY="v1_..."
 v0 auth whoami --json`
 
-const shorthandCode = `# Shorthand: first non-command arg → chat create --message
+const shorthandCode = `# Prompts route to chat create
 v0 "landing page with hero and pricing"
 
-# Explicit (preferred for agents — cleaner audit trail)
-v0 chat create --message "landing page with hero and pricing" --json`
+# Paths, URLs, and template ids route to chat init (no token cost)
+v0 .                                            # cwd
+v0 ./my-project                                 # local dir
+v0 https://github.com/foo/bar                   # public repo
+v0 https://example.com/dist.zip                 # zip archive
+v0 https://example.com/registry.json            # shadcn registry
+v0 https://v0.app/templates/optimus-…-LHv4frpA7Us   # template url
+v0 template_abc                                 # template id
+
+# Explicit forms still work (cleaner audit trail for agents)
+v0 chat create --message "landing page with hero and pricing" --json
+v0 chat init ./my-project --json`
 
 const doctorCode = `$ v0 doctor
 v0 doctor
@@ -93,9 +103,27 @@ const toc = [
   <section id="shorthand" class="doc-section">
     <h2 class="doc-h2">Shorthand</h2>
     <p class="doc-p">
-      Any first non-flag argument that is not a registered command name becomes the positional
-      <code class="doc-code">--message</code> for <code class="doc-code">chat create</code>. Ergonomic for humans, fine for agents, but the
-      explicit form shows up cleaner in <code class="doc-code">v0 audit tail</code>.
+      <code class="doc-code">v0 &lt;arg&gt;</code> auto-routes based on the shape of the arg. Paths, URLs, and template
+      ids go to <code class="doc-code">chat init</code> (zero token cost, seeds a chat from existing source). Bare
+      prompts and anything that is not path-like go to <code class="doc-code">chat create</code>. The explicit
+      forms still work and show up cleaner in <code class="doc-code">v0 audit tail</code>.
+    </p>
+    <div class="doc-table">
+      <div class="doc-row doc-row-header"><div>Input</div><div>Routes to</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 .</code></div><div><code class="doc-code">chat init</code> — cwd</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 ./dir</code></div><div><code class="doc-code">chat init</code> — files</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 ~/path</code> · <code class="doc-code">v0 /abs/path</code></div><div><code class="doc-code">chat init</code> — files</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 https://github.com/foo/bar</code></div><div><code class="doc-code">chat init</code> — repo</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 https://example.com/dist.zip</code></div><div><code class="doc-code">chat init</code> — zip</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 https://example.com/registry.json</code></div><div><code class="doc-code">chat init</code> — registry (shadcn)</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 https://v0.app/templates/&hellip;</code></div><div><code class="doc-code">chat init</code> — template (id extracted)</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 template_abc</code> · <code class="doc-code">v0 tpl_abc</code></div><div><code class="doc-code">chat init</code> — template</div></div>
+      <div class="doc-row"><div><code class="doc-code">v0 "landing page with hero"</code></div><div><code class="doc-code">chat create</code> — prompt</div></div>
+    </div>
+    <p class="doc-p">
+      Bare words like <code class="doc-code">v0 dashboard</code> go to <code class="doc-code">chat create</code>. Only paths,
+      URLs, and template prefixes (<code class="doc-code">template_</code>, <code class="doc-code">tpl_</code>) route to
+      <code class="doc-code">chat init</code>.
     </p>
     <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={shorthandCode} lang="bash" theme="vesper" /></div></div></div>
   </section>
