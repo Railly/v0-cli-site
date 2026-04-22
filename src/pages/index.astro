@@ -3,44 +3,45 @@ import { Code } from 'astro:components'
 import V0Logo from '../components/V0Logo.astro'
 import Base from '../layouts/Base.astro'
 
-const humanWorkflow = `# Start from a prompt. Shorthand for chat create.
+const heroHuman = `# Shorthand for chat create.
 v0 "landing page with hero + pricing"
 
-# Or init from files you already have.
-v0 chat init --source ./my-template
-
 # Iterate.
-v0 msg send <chat-id> "swap the hero copy"
+v0 msg send <chat> "swap the hero copy"
 
 # Ship.
-v0 deploy <chat-id> <version-id>`
+v0 deploy <chat> <version>`
 
-const agentWorkflow = `# Preflight. Agents run this first.
+const heroAgent = `# Preflight. Agents run this first.
 v0 doctor --json
 
-# Init, capture the id.
-CHAT=$(v0 chat init --source ./my-template --json | jq -r '.data.id')
+# Capture ids for later steps.
+CHAT=$(v0 chat init --source . --json | jq -r '.data.id')
+VER=$(v0 version list "$CHAT" --limit 1 --json \\
+  | jq -r '.data.data[0].id')
 
-# Resolve newest version, deploy with terminal polling.
-VER=$(v0 version list "$CHAT" --limit 1 --json | jq -r '.data.data[0].id')
+# Deploy and wait for terminal status.
 v0 deploy create "$CHAT" "$VER" --yes --wait --json`
+
+const heroJson = `{
+  "data": {
+    "id": "chat_8kwbm",
+    "object": "chat",
+    "latestVersion": {
+      "id": "ver_14lmv",
+      "files": [{ "name": "app/page.tsx" }]
+    }
+  }
+}`
 ---
 
 <Base>
-  <!-- Nav -->
-  <header class="relative z-10 flex items-center justify-between px-8 py-6 md:px-10">
+  <!-- Top nav -->
+  <header class="relative z-10 flex items-center justify-between px-8 py-5 md:px-10">
     <a href="/" class="flex items-center gap-2 text-white">
       <V0Logo size={18} class="text-white" />
       <span class="font-sans text-base font-semibold tracking-tight">v0-cli</span>
     </a>
-    <nav class="hidden items-center gap-1 text-sm md:flex">
-      <a href="#install" class="pill-sm pill">Install</a>
-      <a href="#trust" class="pill-sm pill">Trust ladder</a>
-      <a href="#workflow" class="pill-sm pill">Workflow</a>
-      <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="pill-sm pill">
-        GitHub ↗
-      </a>
-    </nav>
     <a
       href="https://github.com/Railly/v0-cli"
       target="_blank"
@@ -51,367 +52,351 @@ v0 deploy create "$CHAT" "$VER" --yes --wait --json`
     </a>
   </header>
 
-  <!-- Hero -->
-  <section class="relative mx-auto w-full max-w-[1320px] px-6 pt-12 pb-20 md:pt-16">
-    <div class="grid-bg relative min-h-[620px] w-full">
-      <span class="crosshair" style="top:-7px;left:-7px"></span>
-      <span class="crosshair" style="top:-7px;right:-7px"></span>
-      <span class="crosshair" style="bottom:-7px;left:-7px"></span>
-      <span class="crosshair" style="bottom:-7px;right:-7px"></span>
+  <!-- Sub-nav -->
+  <nav class="flex items-center justify-center gap-6 border-b border-[var(--color-hairline)] pb-4 text-sm text-[var(--color-text-secondary)]">
+    <a href="#overview" class="transition-colors hover:text-white">Overview</a>
+    <a href="#install" class="transition-colors hover:text-white">Install</a>
+    <a href="#workflow" class="transition-colors hover:text-white">Workflow</a>
+    <a href="#trust" class="transition-colors hover:text-white">Trust</a>
+    <a href="https://github.com/Railly/v0-cli#readme" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">Docs ↗</a>
+  </nav>
 
-      <!-- Paired bubbles, top half of hero. White declares, dark replies. -->
-      <div class="relative flex flex-col items-start gap-5 px-6 pt-20 md:flex-row md:items-end md:justify-between md:px-16 md:pt-24">
-        <!-- Left: white bubble (logo mark + wordmark inside) -->
-        <div class="bubble bubble-light bubble-tail-br inline-flex items-baseline gap-3">
-          <V0Logo size={44} class="self-center text-black" />
-          <h1
-            class="font-sans font-semibold text-black"
-            style="font-size:var(--text-hero);line-height:var(--text-hero--line-height);letter-spacing:var(--text-hero--letter-spacing);"
+  <!-- HERO: two-column grid, left = pitch, right = code tabs -->
+  <section id="overview" class="relative mx-auto w-full max-w-[1320px] px-6 pt-20 pb-24 md:px-10 md:pt-24">
+    <!-- single hairline crosshair top-left as subtle tech mark -->
+    <span class="crosshair absolute" style="top:56px;left:16px"></span>
+
+    <div class="grid items-start gap-12 lg:grid-cols-[minmax(0,440px)_1fr] lg:gap-16">
+      <!-- Left: headline + subtitle + CTAs -->
+      <div>
+        <h1
+          class="font-sans font-semibold text-white"
+          style="font-size:clamp(44px,5vw,64px);line-height:1.02;letter-spacing:-0.03em;"
+        >
+          The v0 CLI<br />For Developers
+        </h1>
+        <p class="mt-6 max-w-[420px] text-[var(--color-text-secondary)]" style="font-size:18px;line-height:1.5;">
+          Create, iterate, and deploy v0 chats from the terminal. Stable JSON,
+          trust ladder, audit trail, single-use intent tokens for destructive ops.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href="#install"
+            class="pill"
+            style="background:#ededed;color:#000;border-color:#ededed;padding:11px 18px;font-weight:500;"
           >
-            cli.
-          </h1>
+            <V0Logo size={14} class="text-black" />
+            Get started
+          </a>
+          <a
+            href="https://github.com/Railly/v0-cli"
+            target="_blank"
+            rel="noreferrer"
+            class="pill"
+            style="padding:11px 18px;font-weight:500;"
+          >
+            View on GitHub ↗
+          </a>
         </div>
-
-        <!-- Right: dark bubble with positioning + CTAs -->
-        <div class="bubble bubble-dark bubble-tail-bl max-w-[540px]">
-          <p
-            class="font-sans font-semibold"
-            style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-          >
-            Agent-first command-line wrapper
-            <span style="color:var(--color-text-secondary);">for the v0 Platform API.</span>
-          </p>
-          <div class="mt-5 flex flex-wrap items-center gap-3">
-            <a
-              href="#install"
-              class="pill"
-              style="background:#ededed;color:#000;border-color:#ededed;"
-            >
-              Get started
-            </a>
-            <a
-              href="https://github.com/Railly/v0-cli"
-              target="_blank"
-              rel="noreferrer"
-              class="pill"
-            >
-              View on GitHub ↗
-            </a>
-          </div>
+        <div class="mt-6 flex items-center gap-3 text-sm text-[var(--color-text-secondary)]">
+          <span>Pairs with</span>
+          <span class="pill pill-sm">Claude Code</span>
+          <span class="pill pill-sm">Cursor</span>
+          <a href="#install" class="underline decoration-[var(--color-hairline)] underline-offset-4 hover:text-white">and agents</a>
         </div>
       </div>
 
-      <!-- Terminal bubble, bottom half. Shiki handles syntax coloring;
-           each command line reveals sequentially via CSS. -->
-      <div class="mt-16 flex justify-center px-6 md:mt-24 md:px-16">
-        <div
-          class="bubble-dark hero-terminal w-full max-w-[820px] overflow-hidden p-0"
-          style="border-radius:var(--radius-card);"
-        >
-          <div class="flex items-center gap-2 border-b border-[var(--color-hairline)] px-5 py-3 text-xs text-[var(--color-text-muted)]">
-            <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-            <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-            <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-            <span class="ml-3 font-mono">v0-cli</span>
-            <span class="ml-auto font-mono">bash</span>
+      <!-- Right: code block with tabs -->
+      <div class="code-card" style="border-radius:var(--radius-card);">
+        <div class="code-tabs">
+          <button class="code-tab is-active" data-tab="human" type="button">human</button>
+          <button class="code-tab" data-tab="agent" type="button">agent</button>
+          <button class="code-tab" data-tab="json" type="button">--json</button>
+          <span class="ml-auto pr-3 font-mono text-xs text-[var(--color-text-muted)]">bash</span>
+        </div>
+        <div class="code-panels">
+          <div class="code-panel is-active" data-panel="human">
+            <Code code={heroHuman} lang="bash" theme="vesper" />
           </div>
-          <div class="px-6 py-5 flex flex-col gap-1">
-            <div class="reveal-line reveal-line-1">
-              <Code code={`$ v0 "landing page with hero + pricing"`} lang="bash" theme="vesper" />
-              <span class="caret">▍</span>
-            </div>
-            <div class="reveal-line reveal-line-2">
-              <Code code={`$ v0 deploy`} lang="bash" theme="vesper" />
-            </div>
-            <div class="reveal-line reveal-line-3">
-              <Code code={`$ v0 doctor`} lang="bash" theme="vesper" />
-            </div>
+          <div class="code-panel" data-panel="agent">
+            <Code code={heroAgent} lang="bash" theme="vesper" />
+          </div>
+          <div class="code-panel" data-panel="json">
+            <Code code={heroJson} lang="json" theme="vesper" />
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature grid: 3-up, AI-Gateway-style one-liner cards -->
+  <section class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 md:px-10">
+    <div class="grid divide-[var(--color-hairline)] md:grid-cols-3 md:divide-x">
+      <div class="px-2 py-12 md:px-10">
+        <h3 class="font-sans font-semibold text-white" style="font-size:22px;line-height:1.2;letter-spacing:-0.01em;">
+          One API key,<br />hundreds of commands
+        </h3>
+        <p class="mt-4 text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+          Single <code class="font-mono text-[13px] text-white">v0</code> binary maps the entire v0 Platform API.
+          55 operations across chats, versions, deployments, env vars, webhooks, MCP servers.
+        </p>
+      </div>
+      <div class="px-2 py-12 md:px-10">
+        <h3 class="font-sans font-semibold text-white" style="font-size:22px;line-height:1.2;letter-spacing:-0.01em;">
+          Stable JSON,<br />human-readable default
+        </h3>
+        <p class="mt-4 text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+          TTY gets a formatted output. Pipe or add <code class="font-mono text-[13px] text-white">--json</code> and
+          the same command returns a stable envelope ready for <code class="font-mono text-[13px] text-white">jq</code>.
+        </p>
+      </div>
+      <div class="px-2 py-12 md:px-10">
+        <h3 class="font-sans font-semibold text-white" style="font-size:22px;line-height:1.2;letter-spacing:-0.01em;">
+          Safe by default,<br />destructive by intent
+        </h3>
+        <p class="mt-4 text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+          Reads are silent. Writes log. Destructive operations require a single-use intent token bound to the exact
+          action and params it was minted for.
+        </p>
       </div>
     </div>
   </section>
 
   <!-- Install -->
-  <section id="install" class="mx-auto w-full max-w-[1100px] px-6 py-24">
-    <div class="mb-6 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-      <V0Logo size={14} class="text-[var(--color-text-secondary)]" />
-      <span>Install</span>
-    </div>
-    <h2
-      class="mb-10 font-sans font-semibold"
-      style="font-size:var(--text-h1);line-height:var(--text-h1--line-height);letter-spacing:var(--text-h1--letter-spacing);"
-    >
-      One command for the binary. One for the skill.
-    </h2>
-
-    <div class="grid gap-6 md:grid-cols-2">
-      <div
-        class="bubble-dark p-6"
-        style="border-radius:var(--radius-card);"
-      >
-        <div class="mb-3 text-sm text-[var(--color-text-muted)]">CLI binary</div>
-        <Code
-          code={`bun install -g @crafter/v0-cli\nv0 doctor`}
-          lang="bash"
-          theme="vesper"
-          wrap
-        />
-        <p class="mt-4 text-sm text-[var(--color-text-secondary)]">
-          Needs <code class="font-mono">V0_API_KEY</code>. Self-contained binary, no post-install step.
-        </p>
-      </div>
-
-      <div
-        class="bubble-dark p-6"
-        style="border-radius:var(--radius-card);"
-      >
-        <div class="mb-3 text-sm text-[var(--color-text-muted)]">Agent skill</div>
-        <Code code={`npx skills add Railly/v0-cli`} lang="bash" theme="vesper" wrap />
-        <p class="mt-4 text-sm text-[var(--color-text-secondary)]">
-          Teaches Claude Code, Cursor, or any agent the preflight recipe, the JSON contract, the
-          trust ladder, and how intent tokens work.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Workflow: human-first, agent path collapsed underneath -->
-  <section id="workflow" class="mx-auto w-full max-w-[1100px] px-6 py-24">
-    <div class="mb-6 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-      <V0Logo size={14} class="text-[var(--color-text-secondary)]" />
-      <span>Workflow</span>
-    </div>
-    <h2
-      class="mb-4 font-sans font-semibold"
-      style="font-size:var(--text-h1);line-height:var(--text-h1--line-height);letter-spacing:var(--text-h1--letter-spacing);"
-    >
-      Human first. <span style="color:var(--color-text-secondary);">JSON for agents.</span>
-    </h2>
-    <p class="mb-10 max-w-[620px] text-[var(--color-text-secondary)]">
-      By default every command prints readable output. Add <code class="font-mono text-[var(--color-text-primary)]">--json</code>
-      and the same command returns a stable envelope that pipes cleanly into <code class="font-mono text-[var(--color-text-primary)]">jq</code>.
-    </p>
-
-    <div class="grid gap-6 lg:grid-cols-2">
-      <div class="bubble-dark p-0 overflow-hidden" style="border-radius:var(--radius-card);">
-        <div class="flex items-center gap-2 border-b border-[var(--color-hairline)] px-5 py-3 text-xs text-[var(--color-text-muted)]">
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="ml-3 font-mono">human</span>
+  <section id="install" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+      <div>
+        <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+          <span>Install</span>
         </div>
-        <div class="p-6">
-          <Code code={humanWorkflow} lang="bash" theme="vesper" wrap />
-        </div>
+        <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
+          Binary or skill.<br />One line either way.
+        </h2>
       </div>
-
-      <div class="bubble-dark p-0 overflow-hidden" style="border-radius:var(--radius-card);">
-        <div class="flex items-center gap-2 border-b border-[var(--color-hairline)] px-5 py-3 text-xs text-[var(--color-text-muted)]">
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="size-2 rounded-full bg-[var(--color-text-muted)]"></span>
-          <span class="ml-3 font-mono">agent</span>
+      <div class="grid gap-5 md:grid-cols-2">
+        <div class="code-card p-6">
+          <div class="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+            <span>CLI binary</span>
+            <span class="font-mono normal-case tracking-normal text-[var(--color-text-muted)]">bash</span>
+          </div>
+          <Code code={`bun install -g @crafter/v0-cli\nv0 doctor`} lang="bash" theme="vesper" />
+          <p class="mt-5 text-sm text-[var(--color-text-secondary)]">
+            Needs <code class="font-mono text-[13px] text-white">V0_API_KEY</code>. Self-contained, no post-install step.
+          </p>
         </div>
-        <div class="p-6">
-          <Code code={agentWorkflow} lang="bash" theme="vesper" wrap />
+        <div class="code-card p-6">
+          <div class="mb-3 flex items-center justify-between text-[11px] uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+            <span>Agent skill</span>
+            <span class="font-mono normal-case tracking-normal text-[var(--color-text-muted)]">bash</span>
+          </div>
+          <Code code={`npx skills add Railly/v0-cli`} lang="bash" theme="vesper" />
+          <p class="mt-5 text-sm text-[var(--color-text-secondary)]">
+            Teaches Claude Code, Cursor, or any agent the preflight recipe, the JSON contract,
+            the trust ladder, and how intent tokens work.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Trust ladder -->
-  <section id="trust" class="mx-auto w-full max-w-[1100px] px-6 py-24">
-    <div class="mb-6 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-      <V0Logo size={14} class="text-[var(--color-text-secondary)]" />
-      <span>Trust ladder</span>
-    </div>
-    <h2
-      class="mb-4 font-sans font-semibold"
-      style="font-size:var(--text-h1);line-height:var(--text-h1--line-height);letter-spacing:var(--text-h1--letter-spacing);"
-    >
-      Four levels. <span style="color:var(--color-text-secondary);">Safety readable from the command name.</span>
-    </h2>
-    <p class="mb-10 max-w-[620px] text-[var(--color-text-secondary)]">
-      Reads are silent. Writes log. Destructive operations want a confirmation, or a single-use
-      intent token that only works for the exact action and params it was minted for.
-    </p>
-
-    <div class="grid gap-4 md:grid-cols-2">
-      <article class="bubble-dark p-7" style="border-radius:var(--radius-card);">
-        <div class="mb-3 flex items-baseline gap-3">
-          <span class="font-mono text-[var(--color-text-muted)]">T0</span>
-          <h3
-            class="font-sans font-semibold"
-            style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-          >
-            Auto.
-          </h3>
+  <!-- Workflow split card: left text, right panels -->
+  <section id="workflow" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+      <div>
+        <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+          <span>Workflow</span>
         </div>
-        <p class="text-[var(--color-text-secondary)]">
-          Silent reads. <span class="font-mono text-sm text-[var(--color-text-primary)]">v0 doctor</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">auth whoami</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">project list</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">schema</span>, every
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">list</span> and
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">show</span>.
+        <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
+          Human first.<br /><span class="text-[var(--color-text-secondary)]">JSON for agents.</span>
+        </h2>
+        <p class="mt-4 text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+          Default output is readable. Add <code class="font-mono text-[13px] text-white">--json</code> and the
+          exact same command returns a stable envelope that pipes cleanly into
+          <code class="font-mono text-[13px] text-white">jq</code>.
         </p>
-      </article>
-
-      <article class="bubble-dark p-7" style="border-radius:var(--radius-card);">
-        <div class="mb-3 flex items-baseline gap-3">
-          <span class="font-mono text-[var(--color-text-muted)]">T1</span>
-          <h3
-            class="font-sans font-semibold"
-            style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-          >
-            Log.
-          </h3>
+      </div>
+      <div class="grid gap-5 md:grid-cols-2">
+        <div class="code-card p-0 overflow-hidden">
+          <div class="code-tabs" style="border-bottom:1px solid var(--color-hairline);">
+            <span class="code-tab is-static">human</span>
+            <span class="ml-auto pr-3 font-mono text-xs text-[var(--color-text-muted)]">bash</span>
+          </div>
+          <div class="p-6">
+            <Code code={heroHuman} lang="bash" theme="vesper" />
+          </div>
         </div>
-        <p class="text-[var(--color-text-secondary)]">
-          Audit only, no prompt. <span class="font-mono text-sm text-[var(--color-text-primary)]">chat create</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">chat init</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">msg send</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">env set</span> (plain keys),
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">project create</span>.
-        </p>
-      </article>
-
-      <article class="bubble-dark p-7" style="border-radius:var(--radius-card);">
-        <div class="mb-3 flex items-baseline gap-3">
-          <span class="font-mono text-[var(--color-text-muted)]">T2</span>
-          <h3
-            class="font-sans font-semibold"
-            style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-          >
-            Confirm.
-          </h3>
+        <div class="code-card p-0 overflow-hidden">
+          <div class="code-tabs" style="border-bottom:1px solid var(--color-hairline);">
+            <span class="code-tab is-static">agent</span>
+            <span class="ml-auto pr-3 font-mono text-xs text-[var(--color-text-muted)]">bash</span>
+          </div>
+          <div class="p-6">
+            <Code code={heroAgent} lang="bash" theme="vesper" />
+          </div>
         </div>
-        <p class="text-[var(--color-text-secondary)]">
-          TTY prompt or <span class="font-mono text-sm text-[var(--color-text-primary)]">--yes</span>.
-          Exits 2 in JSON mode without <span class="font-mono text-sm text-[var(--color-text-primary)]">--yes</span>.
-          Covers <span class="font-mono text-sm text-[var(--color-text-primary)]">deploy create</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">env list --decrypted</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">chat delete</span>.
-        </p>
-      </article>
-
-      <article class="bubble-dark p-7" style="border-radius:var(--radius-card);">
-        <div class="mb-3 flex items-baseline gap-3">
-          <span class="font-mono text-[var(--color-text-muted)]">T3</span>
-          <h3
-            class="font-sans font-semibold"
-            style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-          >
-            Killswitch.
-          </h3>
-        </div>
-        <p class="text-[var(--color-text-secondary)]">
-          Single-use intent token bound to
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">action + hash(params)</span>.
-          Expires. Cannot be reused. Cannot be retargeted.
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">hook delete</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">deploy delete</span>,
-          <span class="font-mono text-sm text-[var(--color-text-primary)]">env delete</span> (bulk).
-        </p>
-      </article>
+      </div>
     </div>
   </section>
 
-  <!-- Why -->
-  <section class="mx-auto w-full max-w-[1100px] px-6 py-24">
-    <div class="mb-6 flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-      <V0Logo size={14} class="text-[var(--color-text-secondary)]" />
-      <span>Why a CLI, not raw API calls</span>
+  <!-- Trust ladder: 4 hairline cards, horizontal -->
+  <section id="trust" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+      <div>
+        <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+          <span>Trust ladder</span>
+        </div>
+        <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
+          Four levels.<br /><span class="text-[var(--color-text-secondary)]">Readable from the command name.</span>
+        </h2>
+      </div>
+      <div class="grid gap-5 md:grid-cols-2">
+        <article class="code-card p-6">
+          <div class="mb-2 flex items-baseline gap-3">
+            <span class="font-mono text-sm text-[var(--color-text-muted)]">T0</span>
+            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Auto.</h3>
+          </div>
+          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+            Silent reads. <code class="font-mono text-[13px] text-white">v0 doctor</code>,
+            <code class="font-mono text-[13px] text-white">auth whoami</code>,
+            <code class="font-mono text-[13px] text-white">project list</code>, every
+            <code class="font-mono text-[13px] text-white">list</code> and
+            <code class="font-mono text-[13px] text-white">show</code>.
+          </p>
+        </article>
+        <article class="code-card p-6">
+          <div class="mb-2 flex items-baseline gap-3">
+            <span class="font-mono text-sm text-[var(--color-text-muted)]">T1</span>
+            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Log.</h3>
+          </div>
+          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+            Audit only, no prompt. <code class="font-mono text-[13px] text-white">chat create</code>,
+            <code class="font-mono text-[13px] text-white">chat init</code>,
+            <code class="font-mono text-[13px] text-white">msg send</code>,
+            <code class="font-mono text-[13px] text-white">env set</code> (plain keys),
+            <code class="font-mono text-[13px] text-white">project create</code>.
+          </p>
+        </article>
+        <article class="code-card p-6">
+          <div class="mb-2 flex items-baseline gap-3">
+            <span class="font-mono text-sm text-[var(--color-text-muted)]">T2</span>
+            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Confirm.</h3>
+          </div>
+          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+            TTY prompt or <code class="font-mono text-[13px] text-white">--yes</code>. Exits 2 in JSON
+            mode without it. Covers <code class="font-mono text-[13px] text-white">deploy create</code>,
+            <code class="font-mono text-[13px] text-white">env list --decrypted</code>,
+            <code class="font-mono text-[13px] text-white">chat delete</code>.
+          </p>
+        </article>
+        <article class="code-card p-6">
+          <div class="mb-2 flex items-baseline gap-3">
+            <span class="font-mono text-sm text-[var(--color-text-muted)]">T3</span>
+            <h3 class="font-sans font-semibold text-white" style="font-size:20px;letter-spacing:-0.01em;">Killswitch.</h3>
+          </div>
+          <p class="text-[var(--color-text-secondary)]" style="font-size:15px;line-height:1.55;">
+            Single-use intent token bound to <code class="font-mono text-[13px] text-white">action + hash(params)</code>.
+            Expires. Cannot be reused. Cannot be retargeted.
+            <code class="font-mono text-[13px] text-white">hook delete</code>,
+            <code class="font-mono text-[13px] text-white">deploy delete</code>,
+            <code class="font-mono text-[13px] text-white">env delete</code> (bulk).
+          </p>
+        </article>
+      </div>
     </div>
-    <div class="grid gap-8 md:grid-cols-3">
+  </section>
+
+  <!-- FAQ accordion -->
+  <section class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
       <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Stable JSON.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          Every command returns <span class="font-mono text-sm">{'{data}'}</span> or
-          <span class="font-mono text-sm">{'{error}'}</span>. No schema drift.
-        </p>
+        <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+          <span>FAQ</span>
+        </div>
+        <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
+          Frequently<br />Asked Questions
+        </h2>
       </div>
-      <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Validated before fetch.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          <span class="font-mono text-sm">--params</span> bodies are checked against bundled
-          OpenAPI. Typos exit 2 without spending a request.
-        </p>
-      </div>
-      <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Audit every run.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          Two-phase JSONL at <span class="font-mono text-sm">~/.v0cli/audit/</span>. Pending flips
-          to ok or error. API keys redacted to a prefix.
-        </p>
-      </div>
-      <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Rate-limit preflight.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          Writes consult <span class="font-mono text-sm">/rate-limits</span> first. Exits 3 below
-          threshold. Exponential backoff on 429.
-        </p>
-      </div>
-      <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Offline schema.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          <span class="font-mono text-sm">v0 schema &lt;operationId&gt;</span> prints the request
-          and response shape without hitting the API.
-        </p>
-      </div>
-      <div>
-        <h3
-          class="mb-2 font-sans font-semibold"
-          style="font-size:var(--text-h3);line-height:var(--text-h3--line-height);letter-spacing:var(--text-h3--letter-spacing);"
-        >
-          Killswitch.
-        </h3>
-        <p class="text-[var(--color-text-secondary)]">
-          <span class="font-mono text-sm">v0 killswitch on</span> blocks every T2 and T3 op
-          instantly. T0 and T1 keep working.
-        </p>
+      <div class="divide-y divide-[var(--color-hairline)] border-y border-[var(--color-hairline)]">
+        <details class="faq group">
+          <summary class="faq-summary">What is v0-cli?</summary>
+          <div class="faq-body">
+            A single <code class="font-mono text-[13px] text-white">v0</code> binary that wraps the v0 Platform API.
+            It mirrors the entire SDK surface, enforces a trust ladder, emits stable JSON for agents, and keeps
+            an audit trail for every run.
+          </div>
+        </details>
+        <details class="faq group">
+          <summary class="faq-summary">How is the trust ladder enforced?</summary>
+          <div class="faq-body">
+            The CLI classifies every command into T0 (silent read) through T3 (destructive, intent-token
+            required). Killswitch on disk blocks T2 and T3 instantly. Intent tokens are bound to
+            <code class="font-mono text-[13px] text-white">action + hash(params)</code>, single-use, with a default
+            15-minute TTL.
+          </div>
+        </details>
+        <details class="faq group">
+          <summary class="faq-summary">What about rate limits and retries?</summary>
+          <div class="faq-body">
+            Writes consult <code class="font-mono text-[13px] text-white">/rate-limits</code> before dispatching and
+            exit 3 when under threshold. On HTTP 429 or 5xx the CLI retries with exponential backoff plus jitter,
+            up to four attempts.
+          </div>
+        </details>
+        <details class="faq group">
+          <summary class="faq-summary">Can agents run it safely?</summary>
+          <div class="faq-body">
+            That's the point. <code class="font-mono text-[13px] text-white">--json</code> is the canonical contract,
+            exit codes are stable (0 ok, 1 API, 2 validation, 3 rate-limited, 4 killswitch, 5 intent required/invalid,
+            6 network). Every run writes a two-phase entry (pending then ok or error) to
+            <code class="font-mono text-[13px] text-white">~/.v0cli/audit/</code>.
+          </div>
+        </details>
+        <details class="faq group">
+          <summary class="faq-summary">Where do I get an API key?</summary>
+          <div class="faq-body">
+            From <a href="https://v0.app/chat/settings/keys" target="_blank" rel="noreferrer" class="text-white underline decoration-[var(--color-hairline)] underline-offset-4 hover:decoration-white">v0.app/chat/settings/keys</a>.
+            Set it as <code class="font-mono text-[13px] text-white">V0_API_KEY</code> in your shell or save it to a profile with
+            <code class="font-mono text-[13px] text-white">v0 auth login</code>.
+          </div>
+        </details>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="mx-auto w-full max-w-[1100px] border-t border-[var(--color-hairline)] px-6 py-10">
+  <footer class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-10 md:px-10">
     <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--color-text-muted)]">
-      <div class="flex items-center gap-2">
-        <V0Logo size={14} class="text-[var(--color-text-muted)]" />
-        <span>v0-cli. MIT.</span>
+      <div class="flex items-center gap-2 text-white">
+        <V0Logo size={14} class="text-white" />
+        <span class="font-mono">v0-cli</span>
+        <span class="text-[var(--color-text-muted)]">· MIT</span>
       </div>
-      <nav class="flex items-center gap-5">
-        <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="hover:text-white">GitHub</a>
-        <a href="https://v0.app/docs/api/platform" target="_blank" rel="noreferrer" class="hover:text-white">v0 Platform API</a>
-        <a href="https://github.com/vercel/v0-sdk" target="_blank" rel="noreferrer" class="hover:text-white">v0-sdk</a>
+      <nav class="flex items-center gap-6">
+        <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">GitHub</a>
+        <a href="https://v0.app/docs/api/platform" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">Platform API</a>
+        <a href="https://github.com/vercel/v0-sdk" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">v0-sdk</a>
       </nav>
     </div>
   </footer>
 </Base>
+
+<script is:inline>
+  // Hero code tabs: simple click swap. Only applies to the hero (first .code-tabs block).
+  document.querySelectorAll('#overview .code-tabs').forEach((tabBar) => {
+    const tabs = tabBar.querySelectorAll('.code-tab[data-tab]')
+    const panels = tabBar.parentElement.querySelectorAll('.code-panel[data-panel]')
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab')
+        tabs.forEach((t) => t.classList.toggle('is-active', t === tab))
+        panels.forEach((p) =>
+          p.classList.toggle('is-active', p.getAttribute('data-panel') === target),
+        )
+      })
+    })
+  })
+</script>
