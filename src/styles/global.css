@@ -64,6 +64,15 @@
 }
 
 /* Base layer. The canvas stays pure black everywhere. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 html,
 body {
   background: var(--color-canvas);

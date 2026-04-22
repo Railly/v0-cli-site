@@ -1,0 +1,54 @@
+---
+import V0Logo from './V0Logo.astro'
+
+interface Props {
+  active?: 'home' | 'docs'
+}
+const { active = 'home' } = Astro.props
+
+const homeLinks = [
+  { href: '/#overview', label: 'Overview' },
+  { href: '/#install', label: 'Install' },
+  { href: '/#workflow', label: 'Workflow' },
+  { href: '/#parallel', label: 'Parallel' },
+]
+
+const docsLinks = [
+  { href: '/docs#quickstart', label: 'Quickstart' },
+  { href: '/docs#commands', label: 'Commands' },
+  { href: '/docs#agent-mode', label: 'Agent mode' },
+  { href: '/docs#trust-ladder', label: 'Trust' },
+]
+
+const links = active === 'docs' ? docsLinks : homeLinks
+---
+
+<header class="relative z-20 flex items-center justify-between gap-6 border-b border-[var(--color-hairline)] px-6 py-4 md:px-10">
+  <a href="/" class="flex items-center gap-[3px] text-white" aria-label="v0-cli home">
+    <V0Logo size={18} class="text-white" />
+    <span class="font-sans text-base font-semibold tracking-tight">-cli</span>
+  </a>
+  <nav class="hidden items-center gap-6 text-sm text-[var(--color-text-secondary)] md:flex">
+    {
+      links.map((l) => (
+        <a href={l.href} class="transition-colors hover:text-white">
+          {l.label}
+        </a>
+      ))
+    }
+    <a
+      href={active === 'docs' ? '/' : '/docs'}
+      class={`transition-colors hover:text-white ${active === 'docs' ? 'text-white' : ''}`}
+    >
+      {active === 'docs' ? 'Home' : 'Docs'}
+    </a>
+  </nav>
+  <a
+    href="https://github.com/Railly/v0-cli"
+    target="_blank"
+    rel="noreferrer"
+    class="pill font-sans text-sm"
+  >
+    Star on GitHub
+  </a>
+</header>
