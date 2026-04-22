@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "assets": "bun scripts/generate-assets.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
@@ -19,6 +20,10 @@
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.12"
+    "@biomejs/biome": "^2.4.12",
+    "@resvg/resvg-js": "^2.6.2",
+    "png-to-ico": "^3.0.1",
+    "satori": "^0.26.0",
+    "sharp": "^0.34.5"
   }
 }
