@@ -39,11 +39,33 @@ const canonicalUrl = canonical
     : siteUrl
 ---
 
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    {/* Theme bootstrap — runs before first paint to avoid FOUC. Reads the
+        user's stored preference or falls back to prefers-color-scheme.
+        Dark is the authoritative default when nothing is known. */}
+    <script is:inline>
+      ;(function () {
+        try {
+          var key = 'v0cli-theme'
+          var stored = localStorage.getItem(key)
+          var prefersLight =
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: light)').matches
+          var theme = stored === 'light' || stored === 'dark'
+            ? stored
+            : prefersLight
+              ? 'light'
+              : 'dark'
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
+      })()
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
@@ -73,5 +95,64 @@ const canonicalUrl = canonical
   </head>
   <body>
     <slot />
+    <script is:inline>
+      ;(function () {
+        var root = document.documentElement
+        var key = 'v0cli-theme'
+
+        function labelFor(theme) {
+          return theme === 'dark'
+            ? 'Switch to light mode'
+            : 'Switch to dark mode'
+        }
+
+        function syncButtons(theme) {
+          var buttons = document.querySelectorAll('[data-theme-toggle]')
+          for (var i = 0; i < buttons.length; i++) {
+            buttons[i].setAttribute('aria-label', labelFor(theme))
+            buttons[i].setAttribute(
+              'aria-pressed',
+              theme === 'light' ? 'true' : 'false',
+            )
+          }
+        }
+
+        function applyTheme(theme) {
+          var prev = root.getAttribute('data-theme')
+          if (prev === theme) return
+          var useVT = typeof document.startViewTransition === 'function'
+          if (useVT) {
+            document.startViewTransition(function () {
+              root.setAttribute('data-theme', theme)
+            })
+          } else {
+            root.classList.add('theme-transitioning')
+            root.setAttribute('data-theme', theme)
+            window.setTimeout(function () {
+              root.classList.remove('theme-transitioning')
+            }, 220)
+          }
+          try {
+            localStorage.setItem(key, theme)
+          } catch (e) {}
+          syncButtons(theme)
+        }
+
+        // Initial sync — the <head> bootstrap already set data-theme.
+        syncButtons(root.getAttribute('data-theme') || 'dark')
+
+        // Event delegation — one listener per page, works for any future
+        // toggle (e.g. inside a mobile drawer).
+        document.addEventListener('click', function (e) {
+          var target = e.target
+          if (!target || !target.closest) return
+          var btn = target.closest('[data-theme-toggle]')
+          if (!btn) return
+          e.preventDefault()
+          var current = root.getAttribute('data-theme') || 'dark'
+          applyTheme(current === 'dark' ? 'light' : 'dark')
+        })
+      })()
+    </script>
   </body>
 </html>
