@@ -128,80 +128,102 @@ body {
   border: 1px solid var(--color-hairline);
 }
 
-/* Bubble tails. iMessage grammar: light bubble tails bottom-right (sender),
-   dark bubble tails bottom-left (receiver). Rendered as two circles stacked
-   to get the classic curve. */
-.bubble-tail-br::before,
+/* Bubble tails — iMessage grammar. The tail is an SVG path positioned at the
+   bottom corner and painted the same color as the bubble (or with a hairline
+   stroke for the dark variant). Using background-image + mask means the tail
+   inherits the fill cleanly and keeps a crisp vector curve at any zoom. */
 .bubble-tail-br::after,
-.bubble-tail-bl::before,
 .bubble-tail-bl::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  border-radius: 50%;
-}
-.bubble-tail-br::before {
-  right: -10px;
-  width: 22px;
-  height: 22px;
-  background: var(--color-bubble-light);
+  bottom: 0;
+  width: 20px;
+  height: 24px;
+  display: block;
+  pointer-events: none;
 }
 .bubble-tail-br::after {
-  right: -18px;
-  width: 12px;
-  height: 12px;
-  background: var(--color-canvas);
-}
-.bubble-tail-bl::before {
-  left: -10px;
-  width: 22px;
-  height: 22px;
-  background: var(--color-bubble-dark);
-  border-left: 1px solid var(--color-hairline);
-  border-bottom: 1px solid var(--color-hairline);
+  right: -12px;
+  background: var(--color-bubble-light);
+  /* Bottom-right tail curve (sender). Mirrors iMessage geometry. */
+  clip-path: path(
+    'M 0,0 C 0,13 4,20 12,22 C 14,23 13,24 10,24 C 5,24 2,22 0,20 Z'
+  );
 }
 .bubble-tail-bl::after {
-  left: -18px;
-  width: 12px;
-  height: 12px;
-  background: var(--color-canvas);
+  left: -12px;
+  background: var(--color-bubble-dark);
+  /* Bottom-left tail curve (receiver). Mirror of bottom-right. */
+  clip-path: path(
+    'M 20,0 C 20,13 16,20 8,22 C 6,23 7,24 10,24 C 15,24 18,22 20,20 Z'
+  );
+}
+/* Dark bubble needs a matching hairline stroke on the tail edge. Draw a
+   1px-wider tail in the hairline color behind the fill. */
+.bubble-tail-bl::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -13px;
+  width: 22px;
+  height: 25px;
+  display: block;
+  pointer-events: none;
+  background: var(--color-hairline);
+  clip-path: path(
+    'M 22,0 C 22,14 18,21 9,23 C 7,24 8,25 11,25 C 16,25 19,23 22,21 Z'
+  );
 }
 
-/* Hero terminal: sequential typing. Each line reveals with a character-width
-   animation; the caret blinks only on the active (last-revealed) line.
-   CSS-only, no JS. */
-.typing-line {
-  display: block;
+/* Shiki (astro:components Code) renders <pre class="astro-code">. Normalize
+   across the site: transparent background, 13px monospace, tight leading. */
+.astro-code,
+pre.astro-code {
+  background: transparent !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  font-family: var(--font-mono) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: auto;
+}
+.astro-code code {
+  font-size: 13px !important;
+  font-family: var(--font-mono) !important;
+}
+
+/* Hero terminal: sequential reveal. Each Code component sits inside a
+   width-clipped wrapper that animates from 0 to 100%. The caret blinks
+   on the active line only. */
+.hero-terminal .reveal-line {
+  display: flex;
+  align-items: center;
   white-space: nowrap;
   overflow: hidden;
-  width: 0;
-  opacity: 0;
+  position: relative;
+  max-width: 0;
   animation-fill-mode: forwards;
-  animation-timing-function: steps(40, end);
+  animation-timing-function: steps(50, end);
+  animation-name: reveal-line;
 }
-.typing-line:first-of-type {
-  animation-name: type-in;
+.hero-terminal .reveal-line-1 {
   animation-duration: 1.8s;
   animation-delay: 0.4s;
 }
-.typing-line-2 {
-  animation-name: type-in;
+.hero-terminal .reveal-line-2 {
   animation-duration: 0.8s;
   animation-delay: 2.6s;
 }
-.typing-line-3 {
-  animation-name: type-in;
+.hero-terminal .reveal-line-3 {
   animation-duration: 0.8s;
   animation-delay: 3.8s;
 }
-@keyframes type-in {
-  0% {
-    width: 0;
-    opacity: 1;
+@keyframes reveal-line {
+  from {
+    max-width: 0;
   }
-  100% {
-    width: 100%;
-    opacity: 1;
+  to {
+    max-width: 100%;
   }
 }
 

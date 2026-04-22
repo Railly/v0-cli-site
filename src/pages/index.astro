@@ -101,10 +101,11 @@ v0 deploy create "$CHAT" "$VER" --yes --wait --json`
         </div>
       </div>
 
-      <!-- Terminal bubble, bottom half. Centered, horizontal. -->
+      <!-- Terminal bubble, bottom half. Shiki handles syntax coloring;
+           each command line reveals sequentially via CSS. -->
       <div class="mt-16 flex justify-center px-6 md:mt-24 md:px-16">
         <div
-          class="bubble-dark w-full max-w-[820px] overflow-hidden p-0"
+          class="bubble-dark hero-terminal w-full max-w-[820px] overflow-hidden p-0"
           style="border-radius:var(--radius-card);"
         >
           <div class="flex items-center gap-2 border-b border-[var(--color-hairline)] px-5 py-3 text-xs text-[var(--color-text-muted)]">
@@ -114,19 +115,16 @@ v0 deploy create "$CHAT" "$VER" --yes --wait --json`
             <span class="ml-3 font-mono">v0-cli</span>
             <span class="ml-auto font-mono">bash</span>
           </div>
-          <div class="p-6 font-mono text-[14px] leading-[1.8]">
-            <div class="typing-line">
-              <span class="text-[var(--color-text-muted)]">$</span>
-              <span class="ml-2">v0 "landing page with hero + pricing"</span>
+          <div class="px-6 py-5 flex flex-col gap-1">
+            <div class="reveal-line reveal-line-1">
+              <Code code={`$ v0 "landing page with hero + pricing"`} lang="bash" theme="vesper" />
               <span class="caret">▍</span>
             </div>
-            <div class="typing-line typing-line-2">
-              <span class="text-[var(--color-text-muted)]">$</span>
-              <span class="ml-2">v0 deploy</span>
+            <div class="reveal-line reveal-line-2">
+              <Code code={`$ v0 deploy`} lang="bash" theme="vesper" />
             </div>
-            <div class="typing-line typing-line-3">
-              <span class="text-[var(--color-text-muted)]">$</span>
-              <span class="ml-2">v0 doctor</span>
+            <div class="reveal-line reveal-line-3">
+              <Code code={`$ v0 doctor`} lang="bash" theme="vesper" />
             </div>
           </div>
         </div>
