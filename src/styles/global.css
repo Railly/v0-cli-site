@@ -88,6 +88,74 @@
   --color-selection-fg: #000000;
 }
 
+/* --------------------------------------------------------------------------
+   Light palette. Warm off-white canvas, near-black foreground. Matches the
+   minimalism of the dark theme — no saturated color, same hairline approach,
+   just inverted alpha on a light base. color-scheme: light hints form controls
+   and scrollbars to switch to their light variants.
+   -------------------------------------------------------------------------- */
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Surfaces. Warm off-white, not pure #fff — reads as intentional. */
+  --color-canvas: #fafafa;
+  --color-elevated: #ffffff;
+  --color-bubble-dark: #f3f4f6;
+  --color-bubble-light: #0a0a0a;
+
+  /* Hairlines + overlays (foreground-on-light alpha). */
+  --color-hairline: rgba(10, 10, 10, 0.1);
+  --color-hairline-hover: rgba(10, 10, 10, 0.3);
+  --color-grid-line: rgba(10, 10, 10, 0.05);
+  --color-crosshair: rgba(10, 10, 10, 0.35);
+  --color-overlay-subtle: rgba(10, 10, 10, 0.03);
+  --color-overlay-soft: rgba(10, 10, 10, 0.04);
+  --color-overlay: rgba(10, 10, 10, 0.06);
+
+  /* Text. Near-black primary keeps it warm (not absolute black on warm bg). */
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #6b7280;
+  --color-text-on-light: #ffffff;
+
+  /* Ink flips to near-black so "hover :to-ink" effects stay legible. */
+  --color-ink: #0a0a0a;
+
+  /* Selection. */
+  --color-selection-bg: #0a0a0a;
+  --color-selection-fg: #ffffff;
+}
+
+/* Tailwind's text-white utility is hardcoded to #fff at compile time, which
+   goes invisible on the warm off-white canvas. Override both the static and
+   hover variants so landing + header markup flips with the theme. Any
+   future `text-white` usage in pages picks this up automatically. */
+[data-theme='light'] .text-white {
+  color: var(--color-ink);
+}
+[data-theme='light'] .hover\:text-white:hover {
+  color: var(--color-ink);
+}
+
+/* In light mode, Shiki's vesper theme (built for dark) reads poorly on warm
+   off-white — the plain-text layer is a pale cream. Swap the default
+   foreground to a muted near-black so code stays readable. Tinted token
+   spans keep their colors; only the base color is overridden. */
+[data-theme='light'] .astro-code,
+[data-theme='light'] .astro-code code,
+[data-theme='light'] .astro-code span {
+  color: #1f2937 !important;
+}
+
+/* The "Get started" CTA hardcodes background:#ededed in inline style.
+   Force-swap to ink-on-canvas so it becomes a dark chip on the light
+   canvas (mirrors how the dark chip reads on black). */
+[data-theme='light'] a.pill[style*='background:#ededed'] {
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+  border-color: #0a0a0a !important;
+}
+
 /* Base layer. */
 html {
   scroll-behavior: smooth;
