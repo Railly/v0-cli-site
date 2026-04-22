@@ -45,12 +45,28 @@ v0 env push prj_xxx --from .env --yes --json
 # Pull decrypted values to disk (T2)
 v0 env pull prj_xxx --out .env.v0 --yes`
 
+const versionDownloadCode = `# Archive a version as a zip (T0, read-only — no confirmation)
+v0 version download <chat-id> <version-id>                          # → ./<ver>.zip
+
+# Tarball instead of zip
+v0 version download <chat-id> <version-id> --format tarball         # → ./<ver>.tar.gz
+
+# Custom output path
+v0 version download <chat-id> <version-id> --out ./my-app.zip
+
+# Bundle default scaffolding files (package.json, tsconfig, etc.)
+v0 version download <chat-id> <version-id> --include-default-files
+
+# JSON mode returns { path, bytes, format }
+v0 version download <chat-id> <version-id> --json`
+
 const toc = [
   { href: '#chat-create', label: 'Create a chat' },
   { href: '#chat-init', label: 'Init from files' },
   { href: '#iterate', label: 'Iterate + ship' },
   { href: '#cmd-env', label: 'env' },
   { href: '#cmd-deploy', label: 'deploy' },
+  { href: '#cmd-version-download', label: 'version download' },
   { href: '#cmd-hook', label: 'hook' },
   { href: '#cmd-all', label: 'All operations' },
 ]
@@ -58,7 +74,7 @@ const toc = [
 
 <DocsLayout
   title="Commands · v0-cli"
-  description="Create chats, init from files, iterate, manage env vars, deploy previews, register webhooks, and the full 55-operation surface."
+  description="Create chats, init from files, iterate, manage env vars, deploy previews, download versions, register webhooks, and the full command surface."
   section="commands"
   kicker="Docs · Commands"
   heading="The full surface, grouped by noun."
@@ -129,6 +145,23 @@ const toc = [
     <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={`# Dry-run first (T2 safe)\nv0 deploy create <chat-id> <ver-id> --dry-run --json\n\n# Ship, wait for READY status\nv0 deploy create <chat-id> <ver-id> --yes --wait --json\n\n# Observe an existing deployment\nv0 deploy logs <dep-id> --tail --json\nv0 deploy errors <dep-id> --json`} lang="bash" theme="vesper" /></div></div></div>
   </section>
 
+  <section id="cmd-version-download" class="doc-section">
+    <h2 class="doc-h2">version download · archive export</h2>
+    <p class="doc-p">
+      Export any chat version as a local archive. <code class="doc-code">version download</code> is <strong>T0</strong>
+      (silent read, no audit prompt, no confirmation) — it does not mutate remote state, it just pulls files.
+      Defaults to a <code class="doc-code">.zip</code> written to the cwd named after the version id.
+    </p>
+    <div class="code-card"><div class="code-tabs"><span class="code-tab is-static">bash</span></div><div class="code-panels"><div class="code-panel is-active"><Code code={versionDownloadCode} lang="bash" theme="vesper" /></div></div></div>
+    <p class="doc-p">Flags:</p>
+    <ul class="doc-list">
+      <li><code class="doc-code">--out &lt;path&gt;</code> — override the output file path.</li>
+      <li><code class="doc-code">--format &lt;zip|tarball&gt;</code> — archive format. Default <code class="doc-code">zip</code>.</li>
+      <li><code class="doc-code">--include-default-files</code> — bundle scaffolding files (package.json, tsconfig, configs) so the archive is runnable standalone.</li>
+      <li><code class="doc-code">--json</code> — emit <code class="doc-code">{`{ path, bytes, format }`}</code> instead of a human summary.</li>
+    </ul>
+  </section>
+
   <section id="cmd-hook" class="doc-section">
     <h2 class="doc-h2">hook · webhooks</h2>
     <p class="doc-p">
@@ -139,9 +172,11 @@ const toc = [
   </section>
 
   <section id="cmd-all" class="doc-section">
-    <h2 class="doc-h2">All 55 operations</h2>
+    <h2 class="doc-h2">All operations</h2>
     <p class="doc-p">
-      The CLI mirrors the v0 Platform API 1:1. Noun · verbs:
+      The CLI mirrors the v0 Platform API 1:1 and adds a few local-only commands
+      (<code class="doc-code">version download</code>, <code class="doc-code">intent</code>, <code class="doc-code">killswitch</code>,
+      <code class="doc-code">audit</code>, <code class="doc-code">doctor</code>). Noun · verbs:
     </p>
     <div class="doc-table">
       <div class="doc-row doc-row-header"><div>Noun</div><div>Verbs</div></div>
@@ -150,7 +185,7 @@ const toc = [
       <div class="doc-row"><div><code class="doc-code">project</code></div><div>list, show, show-by-chat, create, update, assign, delete</div></div>
       <div class="doc-row"><div><code class="doc-code">chat</code></div><div>list, show, create, init, update, fork, favorite, delete, pending, status, watch, wait</div></div>
       <div class="doc-row"><div><code class="doc-code">msg</code></div><div>list, show, send, resume, stop</div></div>
-      <div class="doc-row"><div><code class="doc-code">version</code></div><div>list, show, update, files-delete</div></div>
+      <div class="doc-row"><div><code class="doc-code">version</code></div><div>list, show, update, files-delete, download</div></div>
       <div class="doc-row"><div><code class="doc-code">deploy</code></div><div>list, show, create, delete, logs, errors, batch</div></div>
       <div class="doc-row"><div><code class="doc-code">env</code></div><div>list, get, set, update, delete, pull, push</div></div>
       <div class="doc-row"><div><code class="doc-code">hook</code></div><div>list, show, create, update, delete</div></div>
