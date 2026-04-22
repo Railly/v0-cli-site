@@ -565,9 +565,24 @@ pre.astro-code {
   background: var(--color-overlay-subtle);
 }
 
-/* Active link state for TOC ScrollSpy. */
+/* Active link state for TOC ScrollSpy — subtle left-edge indicator
+   that reads against the container's hairline border-left. */
+.toc-link {
+  position: relative;
+  display: inline-block;
+  padding-left: 2px;
+}
 .toc-link.is-active {
   color: var(--color-ink);
+}
+.toc-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-ink);
 }
 
 /* Sidebar link active state. */
