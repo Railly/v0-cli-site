@@ -4,8 +4,11 @@ import Header from '../components/Header.astro'
 import V0Logo from '../components/V0Logo.astro'
 import Base from '../layouts/Base.astro'
 
-const heroHuman = `# Shorthand for chat create.
+const heroHuman = `# Prompt → chat create.
 v0 "landing page with hero + pricing"
+
+# Path → chat init (no tokens, seeds a chat from local code).
+v0 ./my-project
 
 # Iterate.
 v0 msg send <chat> "swap the hero copy"
@@ -233,6 +236,68 @@ v0 chat watch chat_def           # live stream render`
           <div class="p-6">
             <Code code={heroAgent} lang="bash" theme="vesper" />
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shorthand: one command, auto-routed -->
+  <section id="shorthand" class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-24 md:px-10">
+    <div class="grid gap-12 lg:grid-cols-[260px_1fr]">
+      <div>
+        <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+          <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+          <span>Shorthand</span>
+        </div>
+        <h2 class="font-sans font-semibold text-white" style="font-size:34px;line-height:1.1;letter-spacing:-0.02em;">
+          One command.<br /><span class="text-[var(--color-text-secondary)]">Auto-routed.</span>
+        </h2>
+        <p class="mt-6 max-w-[440px] text-[var(--color-text-secondary)]" style="font-size:16px;line-height:1.55;">
+          <code class="font-mono text-[14px] text-white">v0 &lt;arg&gt;</code> picks the right verb based on what you pass.
+          Paths, URLs, and template ids route to <code class="font-mono text-[14px] text-white">chat init</code>. Bare prompts route to
+          <code class="font-mono text-[14px] text-white">chat create</code>.
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-secondary)]">
+          <span class="pill pill-sm">chat init</span>
+          <span class="pill pill-sm">chat create</span>
+        </div>
+      </div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 .`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (cwd)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 ./mi-proyecto`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (files)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 ~/code/app`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (files)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 https://github.com/foo/bar`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (repo)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 https://example.com/dist.zip`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (zip)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 https://example.com/registry.json`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (registry)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 https://v0.app/templates/optimus-…`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (template)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4">
+          <Code code={`v0 template_abc`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat init (template)</span>
+        </div>
+        <div class="code-card flex items-center justify-between gap-4 px-5 py-4 md:col-span-2">
+          <Code code={`v0 "landing page with hero"`} lang="bash" theme="vesper" />
+          <span class="whitespace-nowrap font-mono text-[12px] text-[var(--color-text-muted)]">→ chat create (prompt)</span>
         </div>
       </div>
     </div>
