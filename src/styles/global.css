@@ -266,3 +266,222 @@ pre.astro-code {
   background: #ffffff;
   color: #000000;
 }
+
+/* ===========================================================================
+   Docs prose styles — namespaced under .prose-docs to avoid leaking into
+   landing. Reference: Vercel docs + Linear docs. Hairline-heavy, monochrome,
+   one subtle accent. No Tailwind typography plugin.
+   =========================================================================== */
+
+.prose-docs {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.prose-docs h1 {
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(38px, 4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 1.25rem 0;
+}
+
+.prose-docs > .doc-section:first-of-type .doc-h2,
+.prose-docs .doc-section:first-child .doc-h2 {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose-docs .doc-section {
+  scroll-margin-top: 96px;
+}
+
+.prose-docs .doc-section + .doc-section {
+  margin-top: 3rem;
+}
+
+.prose-docs .doc-h2,
+.prose-docs h2 {
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 4rem 0 1.25rem 0;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.prose-docs h3 {
+  color: #fff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 2rem 0 0.75rem 0;
+}
+
+.prose-docs .doc-p,
+.prose-docs p {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0 0 1.5rem 0;
+}
+
+.prose-docs .doc-p:last-child,
+.prose-docs p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-docs .doc-p strong,
+.prose-docs p strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.prose-docs a,
+.prose-docs .doc-link {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-hairline);
+  text-underline-offset: 3px;
+  transition: color 160ms var(--ease-default),
+    text-decoration-color 160ms var(--ease-default);
+}
+
+.prose-docs a:hover,
+.prose-docs .doc-link:hover {
+  color: #fff;
+  text-decoration-color: #fff;
+}
+
+/* Inline code. Muted background, mono, tight sizing. */
+.prose-docs .doc-code,
+.prose-docs code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-hairline);
+  border-radius: 6px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.prose-docs .doc-list,
+.prose-docs ul {
+  list-style: none;
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.prose-docs .doc-list > li,
+.prose-docs ul > li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-docs .doc-list > li::before,
+.prose-docs ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 6px;
+  height: 1px;
+  background: var(--color-text-muted);
+}
+
+/* Code cards inside prose get generous vertical breathing room. */
+.prose-docs .code-card {
+  margin: 0 0 1.5rem 0;
+}
+
+/* Tables — hairline borders, grid-based. */
+.prose-docs .doc-table {
+  margin: 0 0 1.5rem 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.prose-docs .doc-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 2fr;
+  gap: 0;
+  align-items: start;
+}
+
+.prose-docs .doc-row + .doc-row {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.prose-docs .doc-row > div {
+  padding: 12px 16px;
+  color: var(--color-text-secondary);
+}
+
+.prose-docs .doc-row > div:first-child {
+  border-right: 1px solid var(--color-hairline);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.prose-docs .doc-row-header {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.prose-docs .doc-row-header > div {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* 3-column variant (trust ladder + all-ops). */
+.prose-docs .doc-table.three-col .doc-row {
+  grid-template-columns: minmax(80px, 1fr) 2fr 3fr;
+}
+
+.prose-docs .doc-table.three-col .doc-row > div:nth-child(2) {
+  border-right: 1px solid var(--color-hairline);
+}
+
+/* Tier pill used in trust ladder table. */
+.tier-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Active link state for TOC ScrollSpy. */
+.toc-link.is-active {
+  color: #fff;
+}
+
+/* Sidebar link active state. */
+.docs-sidebar-link.is-current {
+  color: #fff;
+}
+.docs-sidebar-group.is-current-group > .docs-sidebar-heading {
+  color: var(--color-text-primary);
+}

@@ -1,0 +1,282 @@
+---
+import Header from '../components/Header.astro'
+import V0Logo from '../components/V0Logo.astro'
+import Base from './Base.astro'
+
+export type DocsSectionSlug =
+  | 'index'
+  | 'getting-started'
+  | 'commands'
+  | 'agent-mode'
+  | 'safety'
+  | 'reference'
+
+export interface TocItem {
+  href: string
+  label: string
+}
+
+interface Props {
+  title: string
+  description?: string
+  section: DocsSectionSlug
+  heading: string
+  kicker?: string
+  toc?: TocItem[]
+}
+
+const { title, description, section, heading, kicker, toc = [] } = Astro.props
+
+// Master nav tree. Order matches reading order used for prev/next.
+const sections = [
+  {
+    slug: 'getting-started' as const,
+    name: 'Getting started',
+    href: '/docs/getting-started',
+    items: [
+      { href: '#quickstart', label: 'Quickstart' },
+      { href: '#install', label: 'Installation' },
+      { href: '#auth', label: 'Authentication' },
+      { href: '#doctor', label: 'Health check' },
+      { href: '#shorthand', label: 'Shorthand' },
+    ],
+  },
+  {
+    slug: 'commands' as const,
+    name: 'Commands',
+    href: '/docs/commands',
+    items: [
+      { href: '#chat-create', label: 'Create a chat' },
+      { href: '#chat-init', label: 'Init from files' },
+      { href: '#iterate', label: 'Iterate + ship' },
+      { href: '#cmd-env', label: 'env' },
+      { href: '#cmd-deploy', label: 'deploy' },
+      { href: '#cmd-hook', label: 'hook' },
+      { href: '#cmd-all', label: 'All 55 operations' },
+    ],
+  },
+  {
+    slug: 'agent-mode' as const,
+    name: 'Agent mode',
+    href: '/docs/agent-mode',
+    items: [
+      { href: '#json-contract', label: 'JSON contract' },
+      { href: '#streaming', label: 'Streaming render' },
+      { href: '#parallel', label: 'Parallel chats' },
+      { href: '#params', label: 'Params vs sugar' },
+    ],
+  },
+  {
+    slug: 'safety' as const,
+    name: 'Safety',
+    href: '/docs/safety',
+    items: [
+      { href: '#trust-ladder', label: 'Trust ladder' },
+      { href: '#intent-tokens', label: 'Intent tokens' },
+      { href: '#killswitch', label: 'Killswitch' },
+      { href: '#audit', label: 'Audit trail' },
+    ],
+  },
+  {
+    slug: 'reference' as const,
+    name: 'Reference',
+    href: '/docs/reference',
+    items: [
+      { href: '#config', label: 'Config file' },
+      { href: '#env-vars', label: 'Env vars' },
+      { href: '#exit-codes', label: 'Exit codes' },
+    ],
+  },
+]
+
+const currentIdx = sections.findIndex((s) => s.slug === section)
+const prev = currentIdx > 0 ? sections[currentIdx - 1] : null
+const next = currentIdx >= 0 && currentIdx < sections.length - 1 ? sections[currentIdx + 1] : null
+const currentName = currentIdx >= 0 ? sections[currentIdx].name : 'Docs'
+---
+
+<Base title={title} description={description}>
+  <Header active="docs" />
+
+  <div
+    class="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-10 px-6 pt-10 pb-24 md:px-10 lg:grid-cols-[240px_1fr] xl:grid-cols-[240px_1fr_220px] xl:gap-14"
+  >
+    <!-- LEFT: cross-page sidebar -->
+    <aside class="top-20 hidden self-start lg:sticky lg:block">
+      <nav class="flex flex-col gap-8 text-sm" aria-label="Docs navigation">
+        {
+          sections.map((group) => {
+            const isCurrent = group.slug === section
+            return (
+              <div
+                class={`docs-sidebar-group flex flex-col gap-2 ${isCurrent ? 'is-current-group' : ''}`}
+              >
+                <a
+                  href={group.href}
+                  class={`docs-sidebar-heading font-mono text-[10px] uppercase tracking-[0.18em] transition-colors hover:text-white ${
+                    isCurrent ? 'text-white' : 'text-[var(--color-text-muted)]'
+                  }`}
+                >
+                  {group.name}
+                </a>
+                {isCurrent && (
+                  <ul class="flex flex-col gap-1.5 border-l border-[var(--color-hairline)] pl-3">
+                    {group.items.map((it) => (
+                      <li>
+                        <a
+                          href={it.href}
+                          class="docs-sidebar-link text-[var(--color-text-secondary)] transition-colors hover:text-white"
+                        >
+                          {it.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )
+          })
+        }
+      </nav>
+    </aside>
+
+    <!-- MIDDLE: prose slot -->
+    <main class="min-w-0 max-w-[780px]">
+      <!-- Breadcrumb -->
+      <nav
+        class="mb-6 flex items-center gap-2 text-xs text-[var(--color-text-muted)]"
+        aria-label="Breadcrumb"
+      >
+        <a href="/docs" class="transition-colors hover:text-white">Docs</a>
+        {section !== 'index' && (
+          <>
+            <span aria-hidden="true">/</span>
+            <span class="text-[var(--color-text-secondary)]">{currentName}</span>
+          </>
+        )}
+      </nav>
+
+      <!-- Kicker + title -->
+      <div class="mb-12">
+        {kicker ? (
+          <div class="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+            <V0Logo size={12} class="text-[var(--color-text-muted)]" />
+            <span>{kicker}</span>
+          </div>
+        ) : null}
+        <h1 class="font-sans font-semibold text-white" style="font-size:clamp(38px,4vw,52px);line-height:1.05;letter-spacing:-0.02em;">
+          {heading}
+        </h1>
+      </div>
+
+      <div class="prose-docs">
+        <slot />
+      </div>
+
+      <!-- Prev / Next -->
+      {(prev || next) && (
+        <div class="mt-20 grid grid-cols-1 gap-4 border-t border-[var(--color-hairline)] pt-8 sm:grid-cols-2">
+          {prev ? (
+            <a
+              href={prev.href}
+              class="group flex flex-col gap-1 rounded-[16px] border border-[var(--color-hairline)] px-5 py-4 transition-colors hover:border-[var(--color-hairline-hover)]"
+            >
+              <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                ← Previous
+              </span>
+              <span class="text-[var(--color-text-secondary)] transition-colors group-hover:text-white">
+                {prev.name}
+              </span>
+            </a>
+          ) : (
+            <div></div>
+          )}
+          {next ? (
+            <a
+              href={next.href}
+              class="group flex flex-col items-end gap-1 rounded-[16px] border border-[var(--color-hairline)] px-5 py-4 text-right transition-colors hover:border-[var(--color-hairline-hover)]"
+            >
+              <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                Next →
+              </span>
+              <span class="text-[var(--color-text-secondary)] transition-colors group-hover:text-white">
+                {next.name}
+              </span>
+            </a>
+          ) : (
+            <div></div>
+          )}
+        </div>
+      )}
+
+      <!-- Bottom footer-style nav (keeps parity with old page). -->
+      <div class="mt-10 flex items-center justify-between text-sm">
+        <a href="/" class="text-[var(--color-text-secondary)] transition-colors hover:text-white">← Back to landing</a>
+        <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="text-[var(--color-text-secondary)] transition-colors hover:text-white">Star on GitHub ↗</a>
+      </div>
+    </main>
+
+    <!-- RIGHT: in-page TOC (ScrollSpy) -->
+    <aside class="top-20 hidden self-start xl:sticky xl:block">
+      {toc.length > 0 && (
+        <div class="flex flex-col gap-3 text-sm">
+          <div class="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+            On this page
+          </div>
+          <ul
+            id="toc-in-page"
+            class="flex flex-col gap-1.5 border-l border-[var(--color-hairline)] pl-3 text-[var(--color-text-muted)]"
+          >
+            {toc.map((it) => (
+              <li>
+                <a href={it.href} class="toc-link transition-colors hover:text-white">
+                  {it.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </aside>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mx-auto w-full max-w-[1320px] border-t border-[var(--color-hairline)] px-6 py-10 md:px-10">
+    <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-[var(--color-text-muted)]">
+      <div class="flex items-center gap-[3px] text-white">
+        <V0Logo size={14} class="text-white" />
+        <span class="font-mono">-cli</span>
+        <span class="ml-2 text-[var(--color-text-muted)]">· MIT</span>
+      </div>
+      <nav class="flex items-center gap-6">
+        <a href="/" class="transition-colors hover:text-white">Home</a>
+        <a href="https://github.com/Railly/v0-cli" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">GitHub</a>
+        <a href="https://v0.app/docs/api/platform" target="_blank" rel="noreferrer" class="transition-colors hover:text-white">Platform API</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script is:inline>
+    // ScrollSpy: highlight the TOC link whose section is currently most visible.
+    const toc = document.getElementById('toc-in-page')
+    if (toc) {
+      const links = Array.from(toc.querySelectorAll('a'))
+      const byHref = new Map(links.map((a) => [a.getAttribute('href'), a]))
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const id = '#' + e.target.id
+            const link = byHref.get(id)
+            if (!link) continue
+            if (e.isIntersecting) {
+              links.forEach((l) => l.classList.remove('is-active'))
+              link.classList.add('is-active')
+            }
+          }
+        },
+        { rootMargin: '-30% 0px -60% 0px', threshold: 0 },
+      )
+      document.querySelectorAll('.doc-section').forEach((s) => io.observe(s))
+    }
+  </script>
+</Base>
