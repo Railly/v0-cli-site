@@ -128,51 +128,40 @@ body {
   border: 1px solid var(--color-hairline);
 }
 
-/* Bubble tails — iMessage grammar. The tail is an SVG path positioned at the
-   bottom corner and painted the same color as the bubble (or with a hairline
-   stroke for the dark variant). Using background-image + mask means the tail
-   inherits the fill cleanly and keeps a crisp vector curve at any zoom. */
+/* Bubble tails — iMessage grammar.
+   Implemented as SVG background-image on a ::after pseudo-element. The SVG
+   is a single continuous path that reads as a natural drop from the bubble
+   corner — concave curve into a rounded tip — rather than an abrupt pinch.
+   Positioning: the tail anchors to the bubble corner so the top edge of
+   the tail aligns with the bubble radius, and the tail extends outward. */
+.bubble-tail-br,
+.bubble-tail-bl {
+  position: relative;
+}
 .bubble-tail-br::after,
 .bubble-tail-bl::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: 8px;
   width: 20px;
-  height: 24px;
+  height: 18px;
   display: block;
   pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
+/* Bottom-right (sender / white bubble).
+   Path reads: start at top-left, sweep down-right into a small rounded tip,
+   curve back up to the starting x. Fills with the bubble color. */
 .bubble-tail-br::after {
-  right: -12px;
-  background: var(--color-bubble-light);
-  /* Bottom-right tail curve (sender). Mirrors iMessage geometry. */
-  clip-path: path(
-    'M 0,0 C 0,13 4,20 12,22 C 14,23 13,24 10,24 C 5,24 2,22 0,20 Z'
-  );
+  right: -8px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 18' fill='%23ffffff'><path d='M0 0 C0 10 6 16 17 17 C19 17 19 15 17 14 C11 13 6 9 6 0 Z'/></svg>");
 }
+/* Bottom-left (receiver / dark bubble).
+   Mirror of the above; dark fill with a 1px hairline stroke. */
 .bubble-tail-bl::after {
-  left: -12px;
-  background: var(--color-bubble-dark);
-  /* Bottom-left tail curve (receiver). Mirror of bottom-right. */
-  clip-path: path(
-    'M 20,0 C 20,13 16,20 8,22 C 6,23 7,24 10,24 C 15,24 18,22 20,20 Z'
-  );
-}
-/* Dark bubble needs a matching hairline stroke on the tail edge. Draw a
-   1px-wider tail in the hairline color behind the fill. */
-.bubble-tail-bl::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -13px;
-  width: 22px;
-  height: 25px;
-  display: block;
-  pointer-events: none;
-  background: var(--color-hairline);
-  clip-path: path(
-    'M 22,0 C 22,14 18,21 9,23 C 7,24 8,25 11,25 C 16,25 19,23 22,21 Z'
-  );
+  left: -8px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 18' fill='%230f0f0f' stroke='rgba(255,255,255,0.08)' stroke-width='1'><path d='M20 0 C20 10 14 16 3 17 C1 17 1 15 3 14 C9 13 14 9 14 0 Z'/></svg>");
 }
 
 /* Shiki (astro:components Code) renders <pre class="astro-code">. Normalize

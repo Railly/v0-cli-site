@@ -359,10 +359,12 @@ async function generateFavicon(logoSvg: string) {
   const pathMatch = logoSvg.match(/<path\s[^>]*\/?>/)
   const rawPathTag = pathMatch ? pathMatch[0] : ''
   const pathTag = rawPathTag.replace(/\s*fill="[^"]*"/, '')
-  // Mark sits inside y:4-12 of a 16x16 grid. Use viewBox 0 3 16 10 so
-  // the mark fills most of the frame with ~1px breathing room on the
-  // short axis — reads best at 16x16 and 32x32 tabs.
-  const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 3 16 10">
+  // The brand mark is 16x8 (wide 2:1) inside the source 16x16 viewBox.
+  // Keep the original viewBox so every pixel the designer laid out lands
+  // on an integer grid at common favicon sizes (16, 32) — that matters
+  // more than filling the frame, since cropping a tight viewBox at those
+  // sizes made adjacent strokes merge into white rectangles.
+  const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   <style>
     path { fill: #000; }
     @media (prefers-color-scheme: dark) { path { fill: #fff; } }
@@ -376,7 +378,7 @@ async function generateFavicon(logoSvg: string) {
   //    inside them (older Safari, some Linux browsers). ICO can't adapt
   //    to the tab color scheme, so we bake a white mark — most browser
   //    chrome is dark, and the ICO is only a fallback.
-  const icoSourceSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 3 16 10">
+  const icoSourceSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   ${pathTag.replace(/\/?>$/, ' fill="#ffffff"/>')}
 </svg>`
   const sizes = [16, 32, 48]
