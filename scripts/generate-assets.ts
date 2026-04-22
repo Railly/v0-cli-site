@@ -6,10 +6,23 @@
  *   - src/assets/v0-logo.svg        (brand mark)
  *   - design tokens baked into this file (mirrors src/styles/global.css)
  *
- * Writes:
- *   - public/og.png          1200x630  (Open Graph)
- *   - public/og-twitter.png  1200x600  (Twitter Card)
- *   - public/favicon.ico     16/32/48  (multi-size ICO)
+ * Writes (per-page):
+ *   - public/og.png                          1200x630  (landing OG)
+ *   - public/og-twitter.png                  1200x600  (landing Twitter)
+ *   - public/og-docs.png                     1200x630  (docs hub)
+ *   - public/og-docs-twitter.png             1200x600
+ *   - public/og-docs-getting-started.png     1200x630
+ *   - public/og-docs-getting-started-twitter.png 1200x600
+ *   - public/og-docs-commands.png            1200x630
+ *   - public/og-docs-commands-twitter.png    1200x600
+ *   - public/og-docs-agent-mode.png          1200x630
+ *   - public/og-docs-agent-mode-twitter.png  1200x600
+ *   - public/og-docs-safety.png              1200x630
+ *   - public/og-docs-safety-twitter.png      1200x600
+ *   - public/og-docs-reference.png           1200x630
+ *   - public/og-docs-reference-twitter.png   1200x600
+ *   - public/favicon.ico                     16/32/48  (multi-size ICO)
+ *   - public/favicon.svg                     adaptive mark
  *
  * Re-run with `bun scripts/generate-assets.ts`.
  */
@@ -33,6 +46,7 @@ const tokens = {
   textOnLight: '#000000',
   textPrimary: '#ededed',
   textSecondary: '#a1a1a1',
+  textMuted: '#6b6b6b',
   hairline: 'rgba(255,255,255,0.08)',
   gridLine: 'rgba(255,255,255,0.04)',
   crosshair: 'rgba(255,255,255,0.35)',
@@ -98,8 +112,11 @@ function el(type: string, props: OgNode['props'] = {}): OgNode {
   return { type, props }
 }
 
-/** Build the OG tree. Width/height configurable so one layout serves both sizes. */
-function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
+/** ───────────────────────────────────────────────────────────────────────────
+ *  Landing OG (kept intact from the original design).
+ *  Hero "cli." bubble + dark positioning line bubble + meta row + grid.
+ *  ─────────────────────────────────────────────────────────────────────────── */
+function buildLandingOgTree(width: number, height: number, logoSvg: string): OgNode {
   const gridCell = 82
   const cols = Math.ceil(width / gridCell)
   const rows = Math.ceil(height / gridCell)
@@ -118,7 +135,6 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
       boxSizing: 'border-box',
     },
     children: [
-      // Grid background (thin horizontal + vertical lines)
       el('div', {
         style: {
           position: 'absolute',
@@ -144,9 +160,7 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
           }),
         ),
       }),
-      // Crosshairs (four corners of the content area)
       ...buildCrosshairs(48),
-      // Hero row (white bubble + dark context)
       el('div', {
         style: {
           display: 'flex',
@@ -157,7 +171,6 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
           position: 'relative',
         },
         children: [
-          // White bubble: [logo] cli.
           el('div', {
             style: {
               display: 'flex',
@@ -170,7 +183,6 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
               padding: '28px 44px',
             },
             children: [
-              // Inline logo, scaled
               el('div', {
                 style: {
                   display: 'flex',
@@ -192,8 +204,6 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
               }),
             ],
           }),
-          // Dark bubble: positioning line. Two segments flowing as prose
-          // with a proper word-gap between primary and secondary colors.
           el('div', {
             style: {
               display: 'flex',
@@ -224,7 +234,6 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
           }),
         ],
       }),
-      // Bottom meta row
       el('div', {
         style: {
           display: 'flex',
@@ -243,6 +252,187 @@ function buildOgTree(width: number, height: number, logoSvg: string): OgNode {
           el('div', {
             style: { display: 'flex' },
             children: 'npx skills add Railly/v0-cli',
+          }),
+        ],
+      }),
+    ],
+  })
+}
+
+/** ───────────────────────────────────────────────────────────────────────────
+ *  Docs / sub-page OG template.
+ *  Top-left: [logo] v0-cli badge + section kicker.
+ *  Middle: bold headline, then one-line subtitle.
+ *  Bottom-right crosshair accent. Footer: site · tagline.
+ *  ─────────────────────────────────────────────────────────────────────────── */
+function buildDocsOgTree(
+  width: number,
+  height: number,
+  logoSvg: string,
+  opts: { title: string; subtitle: string; kicker?: string },
+): OgNode {
+  const gridCell = 82
+  const cols = Math.ceil(width / gridCell)
+  const rows = Math.ceil(height / gridCell)
+
+  return el('div', {
+    style: {
+      width: `${width}px`,
+      height: `${height}px`,
+      background: tokens.canvas,
+      color: tokens.textPrimary,
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: 'Geist, system-ui, sans-serif',
+      position: 'relative',
+      padding: '72px 80px',
+      boxSizing: 'border-box',
+      // Hairline top border — matches the site's section dividers.
+      borderTop: `2px solid ${tokens.hairline}`,
+    },
+    children: [
+      // Grid background.
+      el('div', {
+        style: {
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        },
+        children: Array.from({ length: rows }, (_, r) =>
+          el('div', {
+            style: {
+              display: 'flex',
+              flex: 1,
+              borderTop: r === 0 ? 'none' : `1px solid ${tokens.gridLine}`,
+            },
+            children: Array.from({ length: cols }, (_, c) =>
+              el('div', {
+                style: {
+                  flex: 1,
+                  borderLeft: c === 0 ? 'none' : `1px solid ${tokens.gridLine}`,
+                },
+              }),
+            ),
+          }),
+        ),
+      }),
+      ...buildCrosshairs(48),
+      // Top row: brand + kicker
+      el('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          position: 'relative',
+        },
+        children: [
+          el('div', {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            },
+            children: [
+              el('div', {
+                style: {
+                  display: 'flex',
+                  width: '34px',
+                  height: '34px',
+                  color: tokens.textPrimary,
+                },
+                children: logoAsDataUrlImg(logoSvg, 34, tokens.textPrimary),
+              }),
+              el('div', {
+                style: {
+                  display: 'flex',
+                  fontSize: '26px',
+                  fontWeight: 600,
+                  letterSpacing: '-0.01em',
+                  color: tokens.textPrimary,
+                  fontFamily: 'Geist, system-ui, sans-serif',
+                },
+                children: '-cli',
+              }),
+            ],
+          }),
+          ...(opts.kicker
+            ? [
+                el('div', {
+                  style: {
+                    display: 'flex',
+                    marginLeft: '20px',
+                    paddingLeft: '20px',
+                    borderLeft: `1px solid ${tokens.hairline}`,
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: tokens.textMuted,
+                    fontFamily: 'Geist, system-ui, sans-serif',
+                  },
+                  children: opts.kicker,
+                }),
+              ]
+            : []),
+        ],
+      }),
+      // Middle block: headline + subtitle
+      el('div', {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '28px',
+          marginTop: 'auto',
+          marginBottom: 'auto',
+          position: 'relative',
+          maxWidth: `${width - 160}px`,
+        },
+        children: [
+          el('div', {
+            style: {
+              display: 'flex',
+              fontSize: '96px',
+              fontWeight: 600,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.02,
+              color: tokens.textPrimary,
+            },
+            children: opts.title,
+          }),
+          el('div', {
+            style: {
+              display: 'flex',
+              fontSize: '30px',
+              fontWeight: 500,
+              letterSpacing: '-0.01em',
+              lineHeight: 1.3,
+              color: tokens.textSecondary,
+            },
+            children: opts.subtitle,
+          }),
+        ],
+      }),
+      // Footer meta row
+      el('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '22px',
+          color: tokens.textSecondary,
+          fontWeight: 500,
+          letterSpacing: '-0.005em',
+          position: 'relative',
+        },
+        children: [
+          el('div', {
+            style: { display: 'flex', color: tokens.textPrimary },
+            children: 'v0-cli.crafter.run',
+          }),
+          el('div', {
+            style: { display: 'flex' },
+            children: 'Agent-first CLI · v0 Platform API',
           }),
         ],
       }),
@@ -298,7 +488,6 @@ function buildCrosshairs(margin: number): OgNode[] {
 /** Satori does not resolve raw inline SVG via fill=currentColor reliably;
  *  render the logo by inlining it as a data-URL inside an <img>. */
 function logoAsDataUrlImg(logoSvg: string, size: number, fill = '#000000'): OgNode {
-  // Replace currentColor so the data-URL bakes the intended fill.
   const tinted = logoSvg.replace(/currentColor/g, fill)
   const withSize = tinted
     .replace(/height="\d+"/, `height="${size}"`)
@@ -330,40 +519,111 @@ async function renderPng(
   return Buffer.from(resvg.render().asPng())
 }
 
-async function generateOg(fontBuffers: SatoriOptions['fonts'], logoSvg: string) {
-  const ogPath = join(publicDir, 'og.png')
-  const twPath = join(publicDir, 'og-twitter.png')
+/** ───────────────────────────────────────────────────────────────────────────
+ *  Page registry: single source of truth.
+ *  ─────────────────────────────────────────────────────────────────────────── */
+interface PageOg {
+  slug: string
+  /** Basename without extension. og-{name}.png + og-{name}-twitter.png. */
+  fileBase: string
+  /** "landing" uses the bubble hero; "docs" uses the title/subtitle template. */
+  variant: 'landing' | 'docs'
+  title: string
+  subtitle: string
+  kicker?: string
+}
 
-  const ogTree = buildOgTree(1200, 630, logoSvg)
-  const twTree = buildOgTree(1200, 600, logoSvg)
+const pages: PageOg[] = [
+  {
+    slug: 'home',
+    fileBase: 'og',
+    variant: 'landing',
+    title: 'v0-cli',
+    subtitle: 'Agent-first command-line wrapper for the v0 Platform API.',
+  },
+  {
+    slug: 'docs',
+    fileBase: 'og-docs',
+    variant: 'docs',
+    title: 'Docs.',
+    subtitle: 'Install, authenticate, iterate, and ship v0 chats from the terminal.',
+    kicker: 'Docs',
+  },
+  {
+    slug: 'getting-started',
+    fileBase: 'og-docs-getting-started',
+    variant: 'docs',
+    title: 'Getting started.',
+    subtitle: 'Install the binary, save a profile, run doctor, ship your first chat.',
+    kicker: 'Docs · Getting started',
+  },
+  {
+    slug: 'commands',
+    fileBase: 'og-docs-commands',
+    variant: 'docs',
+    title: 'Commands.',
+    subtitle: '55 operations across chats, versions, deployments, env vars, hooks, MCP.',
+    kicker: 'Docs · Commands',
+  },
+  {
+    slug: 'agent-mode',
+    fileBase: 'og-docs-agent-mode',
+    variant: 'docs',
+    title: 'Agent mode.',
+    subtitle: 'JSON contract, streaming render, parallel chats, params vs sugar.',
+    kicker: 'Docs · Agent mode',
+  },
+  {
+    slug: 'safety',
+    fileBase: 'og-docs-safety',
+    variant: 'docs',
+    title: 'Safety.',
+    subtitle: 'Trust ladder, intent tokens, killswitch, two-phase audit trail.',
+    kicker: 'Docs · Safety',
+  },
+  {
+    slug: 'reference',
+    fileBase: 'og-docs-reference',
+    variant: 'docs',
+    title: 'Reference.',
+    subtitle: 'Config file, environment variables, exit codes, stable envelope shapes.',
+    kicker: 'Docs · Reference',
+  },
+]
 
-  await writeFile(ogPath, await renderPng(ogTree, 1200, 630, fontBuffers))
-  console.log('wrote', ogPath)
-  await writeFile(twPath, await renderPng(twTree, 1200, 600, fontBuffers))
-  console.log('wrote', twPath)
+async function generateOgPages(fontBuffers: SatoriOptions['fonts'], logoSvg: string) {
+  for (const page of pages) {
+    const ogWidth = 1200
+    const ogHeight = 630
+    const twWidth = 1200
+    const twHeight = 600
+
+    const buildTree = (w: number, h: number) =>
+      page.variant === 'landing'
+        ? buildLandingOgTree(w, h, logoSvg)
+        : buildDocsOgTree(w, h, logoSvg, {
+            title: page.title,
+            subtitle: page.subtitle,
+            kicker: page.kicker,
+          })
+
+    const ogPath = join(publicDir, `${page.fileBase}.png`)
+    const twPath = join(publicDir, `${page.fileBase}-twitter.png`)
+
+    await writeFile(ogPath, await renderPng(buildTree(ogWidth, ogHeight), ogWidth, ogHeight, fontBuffers))
+    console.log('wrote', ogPath)
+    await writeFile(twPath, await renderPng(buildTree(twWidth, twHeight), twWidth, twHeight, fontBuffers))
+    console.log('wrote', twPath)
+  }
 }
 
 async function generateFavicon(logoSvg: string) {
   const icoPath = join(publicDir, 'favicon.ico')
   const svgPath = join(publicDir, 'favicon.svg')
 
-  // 1. Favicon SVG: pure v0 mark, no canvas, no padding. Uses a CSS
-  //    media query inside the SVG so the fill adapts to the browser's
-  //    color scheme (black on light tabs, white on dark tabs). Same
-  //    approach Vercel ships on its own favicon.
-  //
-  //    The source mark lives between y=4 and y=12 inside a 16x16 viewBox,
-  //    so we retarget the viewBox to 0 0 16 16 but keep everything inside
-  //    a transform that visually centers the glyph vertically. That way
-  //    16x16 tab favicons don't look top-heavy.
   const pathMatch = logoSvg.match(/<path\s[^>]*\/?>/)
   const rawPathTag = pathMatch ? pathMatch[0] : ''
   const pathTag = rawPathTag.replace(/\s*fill="[^"]*"/, '')
-  // The brand mark is 16x8 (wide 2:1) inside the source 16x16 viewBox.
-  // Keep the original viewBox so every pixel the designer laid out lands
-  // on an integer grid at common favicon sizes (16, 32) — that matters
-  // more than filling the frame, since cropping a tight viewBox at those
-  // sizes made adjacent strokes merge into white rectangles.
   const faviconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   <style>
     path { fill: #000; }
@@ -374,10 +634,6 @@ async function generateFavicon(logoSvg: string) {
   await writeFile(svgPath, faviconSvg)
   console.log('wrote', svgPath)
 
-  // 2. ICO fallback for browsers that don't honor SVG favicons or CSS
-  //    inside them (older Safari, some Linux browsers). ICO can't adapt
-  //    to the tab color scheme, so we bake a white mark — most browser
-  //    chrome is dark, and the ICO is only a fallback.
   const icoSourceSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
   ${pathTag.replace(/\/?>$/, ' fill="#ffffff"/>')}
 </svg>`
@@ -393,7 +649,7 @@ async function generateFavicon(logoSvg: string) {
 async function main() {
   await mkdir(publicDir, { recursive: true })
   const [fontBuffers, logoSvg] = await Promise.all([loadFonts(), loadLogoMarkup()])
-  await generateOg(fontBuffers, logoSvg)
+  await generateOgPages(fontBuffers, logoSvg)
   await generateFavicon(logoSvg)
   console.log('\ndone.')
 }
